@@ -65,7 +65,7 @@ void csr_to_sellcs_dfc(const csr_matrix_t* csr_matrix, sellcs_matrix_t* sellcs_m
 
     index_t slice_idx = 0;
     uint64_t vop_count = 0;
-    for (uint64_t r = 0; r < csr_matrix->nrows; r += sellcs_mtx->C) {
+    for (index_t r = 0; r < csr_matrix->nrows; r += sellcs_mtx->C) {
         sellcs_mtx->slice_widths[slice_idx] = rows_size[r];
         sellcs_mtx->vop_pointers[slice_idx] = vop_count;
         vop_count += rows_size[r];
@@ -84,9 +84,9 @@ void csr_to_sellcs_dfc(const csr_matrix_t* csr_matrix, sellcs_matrix_t* sellcs_m
     uint64_t vop_idx = 0;
     uint64_t size_of_matrix = 0;
 
-    for (uint64_t s = 0; s < sellcs_mtx->nslices; s++) {
+    for (index_t s = 0; s < sellcs_mtx->nslices; s++) {
         sellcs_mtx->slice_pointers[s] = size_of_matrix;
-        for (uint64_t v = 0; v < sellcs_mtx->slice_widths[s]; v++)
+        for (index_t v = 0; v < sellcs_mtx->slice_widths[s]; v++)
             size_of_matrix += sellcs_mtx->vop_lengths[vop_idx++] + 1;
     }
     sellcs_mtx->slice_pointers[sellcs_mtx->nslices] = size_of_matrix;
@@ -103,14 +103,14 @@ void csr_to_sellcs_dfc(const csr_matrix_t* csr_matrix, sellcs_matrix_t* sellcs_m
     /* Copy values and column indices from CSR to SELLCS */
 
 #pragma omp parallel for schedule(dynamic, 32)
-    for (uint64_t s = 0; s < sellcs_mtx->nslices; s++) {
+    for (index_t s = 0; s < sellcs_mtx->nslices; s++) {
         index_t swidth = sellcs_mtx->slice_widths[s];
         index_t base_row = s * sellcs_mtx->C;
         uint64_t insert_idx = sellcs_mtx->slice_pointers[s];
         uint64_t vop_id = sellcs_mtx->vop_pointers[s];
 
-        for (uint64_t vop = 0; vop < swidth; vop++) {
-            for (uint64_t r = 0; r < sellcs_mtx->vop_lengths[vop_id] + 1; r++) // Note:  vop length must be + 1
+        for (index_t vop = 0; vop < swidth; vop++) {
+            for (index_t r = 0; r < sellcs_mtx->vop_lengths[vop_id] + 1; r++) // Note:  vop length must be + 1
             {
                 uint64_t csr_nnz_idx = csr_matrix->row_pointers[sellcs_mtx->row_order[base_row + r]] + vop;
                 sellcs_mtx->values[insert_idx] = csr_matrix->values[csr_nnz_idx];
@@ -149,7 +149,7 @@ void csr_to_sellcs(const csr_matrix_t* csr_matrix, sellcs_matrix_t* sellcs_mtx)
 
     uint64_t size_of_matrix = 0;
 
-    for (uint64_t s = 0; s < sellcs_mtx->nslices; s++) {
+    for (index_t s = 0; s < sellcs_mtx->nslices; s++) {
         // Get the Size of the first Row in the Slice.
         index_t max_rsize = rows_size[s * sellcs_mtx->C];
 
@@ -171,7 +171,7 @@ void csr_to_sellcs(const csr_matrix_t* csr_matrix, sellcs_matrix_t* sellcs_mtx)
     memset(sellcs_mtx->values, 0, size_of_mvalues);
 
     /*  Adds CSR values and column indices to SELLCS */
-    for (uint64_t r = 0; r < csr_matrix->nrows; r++) {
+    for (index_t r = 0; r < csr_matrix->nrows; r++) {
         index_t sidx = r / sellcs_mtx->C;
         // Write at index:
         uint64_t write_idx = sellcs_mtx->slice_pointers[sidx] + (r % sellcs_mtx->C);
@@ -260,7 +260,7 @@ void ell_to_sellcs(const index_t nrows,
 
     uint64_t size_of_matrix = 0;
 
-    for (uint64_t s = 0; s < sellcs_mtx->nslices; s++) {
+    for (index_t s = 0; s < sellcs_mtx->nslices; s++) {
         // Get the Size of the first Row in the Slice.
         index_t max_rsize = rs[s * sellcs_mtx->C];
 
@@ -284,7 +284,7 @@ void ell_to_sellcs(const index_t nrows,
     /*  Read ELL values and column indices and write to respective SELLCS*/
 
     /* Write in COLUMN MAJOR order */
-    for (uint64_t r = 0; r < nrows; r++) {
+    for (index_t r = 0; r < nrows; r++) {
         index_t sidx = r / sellcs_mtx->C;
         // Write at index:
         uint64_t write_idx = sellcs_mtx->slice_pointers[sidx] + (r % sellcs_mtx->C);
@@ -292,7 +292,7 @@ void ell_to_sellcs(const index_t nrows,
         uint64_t read_row = sellcs_mtx->row_order[r];
         uint64_t read_idx = read_row;
 
-        for (uint64_t i = 0; i < rs[r]; i++) {
+        for (index_t i = 0; i < rs[r]; i++) {
             sellcs_mtx->values[write_idx] = avalues[read_idx];
             sellcs_mtx->column_indices[write_idx] = (iaind[read_idx] - indexing);
             write_idx += sellcs_mtx->C;
@@ -379,7 +379,7 @@ int32_t sellcs_create_matrix_from_BCSR_rd(
 
     uint64_t size_of_matrix = 0;
 
-    for (uint64_t s = 0; s < sellcs_mtx->nslices; s++) {
+    for (index_t s = 0; s < sellcs_mtx->nslices; s++) {
         // Get the Size of the first Row in the Slice.
         index_t max_rsize = rs[s * sellcs_mtx->C];
 
@@ -402,7 +402,7 @@ int32_t sellcs_create_matrix_from_BCSR_rd(
 
     /*  Reverse order vector*/
     index_t* reverse = (index_t*)aligned_alloc(align_size, sellcs_get_multiple_of_align_size(nrows * sizeof(index_t)));
-    for (size_t r = 0; r < nrows; r++)
+    for (index_t r = 0; r < nrows; r++)
         reverse[sellcs_mtx->row_order[r]] = r;
 
     index_t* written_count = (index_t*)calloc(nrows, sizeof(index_t));

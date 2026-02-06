@@ -23,7 +23,7 @@ void sellcs_mv_d_autovector(const sellcs_matrix_t* matrix,
     const index_t end_row)
 {
     const uint32_t vlen = matrix->C;
-    for (size_t row_idx_i = start_row; row_idx_i < end_row; row_idx_i += vlen) {
+    for (index_t row_idx_i = start_row; row_idx_i < end_row; row_idx_i += vlen) {
         index_t slice_idx = row_idx_i >> matrix->shift;
         index_t row_idx = slice_idx << matrix->shift;
 
@@ -38,7 +38,7 @@ void sellcs_mv_d_autovector(const sellcs_matrix_t* matrix,
         // Y is initialized to 0
         // Non-intrinsics version
         for (index_t j = 0; j < swidth; j++) {
-            for (index_t k = 0; k < vlen; k++) {
+            for (uint32_t k = 0; k < vlen; k++) {
                 // Load Values and Column indices
                 const elem_t aval = values_pointer[k];
                 const index_t col_idx = colidx_pointer[k];

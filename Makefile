@@ -1,49 +1,38 @@
 CC = g++
+ARCH=AVX2
 
-CFLAGS = -Wall -O3 -march=armv8-a+sve2 -fopenmp -fno-tree-vectorize
+ifeq ($(ARCH), AVX2)
+	CFLAGS=-DAVX2 -mavx2 -mfma
+else ifeq ($(ARCH), SVE)
+	CFLAGS=-march=armv8-a+sve2
+else
+	$(error ERROR: Type of arch='$(ARCH) unsuported.)
+endif
 
+CFLAGS += -Wall -O3 -fopenmp
 LDFLAGS = -lm -fopenmp
 
-###### EPAC VEC ######
-# CC = clang
-# CFLAGS = -Wall -Ofast -ffast-math -march=rv64g -mcpu=avispado -mepi -fno-vectorize -Rpass=loop-vectorize -DEPI -DEPI_EXT_07 -DINDEX64 -DALIGN_TO=1024 # -fopenmp-simd -Rpass-analysis=loop-vectorize
-# LDFLAGS = -lm
+TARGET  = build/spmv
+SRC_DIR = src
+OBJ_DIR = build
 
-###### PETSC ######
-# PETSC_DIR = $(HOME)/petsc-dare
-# PETSC_ARCH = arch-linux-c-vec
-# PETSC_INC = -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -DPETSC
-# PETSC_LIB = -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -Wl,-rpath,$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc # -lmpi
+$(sell mkdir -p $(OBJ_DIR))
 
-###### MKL #######
-# MKL_INC = -I$(MKLROOT)/include -DMKL
-# MKL_LIB = -L$(MKLROOT)/lib -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core
+SRCS := $(wildcard $(SRC_DIR)/*c)
+OBJS := $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
-EXE = spmv_power spmm_bench mtx_to_bin # petsc_power petsc_ksp
-OBJ = mtx.o coo.o csr.o csr_numa.o csr_epi.o csr_merge.o csr_bal.o ell.o ell_sort.o jds.o ell0.o sell.o sellcs_mv.o sellcs_mv_autovector.o sellcs_mv_kernels_epi.o sellcs_format.o sellcs_analyzer.o radix_sort.o sellcs_utils.o csr_mkl.o petsc.o ginkgo_spmv.o sellp.o acsr.o
+all: $(TARGET)
 
-all: $(EXE)
+$(TARGET): $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 
-spmv_power: spmv_power.o $(OBJ)
-	$(CC) $(LDFLAGS) $(PETSC_LIB) $(MKL_LIB) $^ -o $@
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-spmm_bench: spmm_bench.o $(OBJ)
-	$(CC) $(LDFLAGS) $(PETSC_LIB) $(MKL_LIB) $^ -o $@
-
-petsc_power: petsc_power.o $(OBJ)
-	$(CC) $(LDFLAGS) $(PETSC_LIB) $(MKL_LIB) $^ -o $@
-
-petsc_ksp: petsc_ksp.o $(OBJ)
-	$(CC) $(LDFLAGS) $(PETSC_LIB) $(MKL_LIB) $^ -o $@
-
-mtx_to_bin: mtx_to_bin.o mtx.o
+spmv: driver_spmv.o $(OBJ_DIR)
 	$(CC) $(LDFLAGS) $^ -o $@
 
-%.o: %.c *.h
-	$(CC) $(CFLAGS) $(PETSC_INC) $(MKL_INC) -c $<
 
 clean:
-	rm -fv $(EXE) *.o *.i *.s tags
+	rm -rf build/*
 
-tags: *.h *.c
-	ctags --languages=C,C++ --exclude=$(PETSC_DIR)/include/petsc/finclude/*.h -R $(PETSC_DIR) *.h *.c

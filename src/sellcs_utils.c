@@ -39,7 +39,7 @@ index_t *sellcs_get_rows_size(const index_t *__restrict row_ptrs, const index_t 
     sellcs_check_malloc(rs, "rows_size\n");
     memset(rs, 0, sellcs_get_multiple_of_align_size(nrows * sizeof(index_t)));
 
-    for (size_t i = 0; i < nrows; i++)
+    for (index_t i = 0; i < nrows; i++)
     {
         rs[i] = row_ptrs[i + 1] - row_ptrs[i];
     }
@@ -68,7 +68,7 @@ uint64_t sellcs_get_num_verticalops(const index_t *__restrict vrows_size, const 
 
     uint64_t total_vops = 0;
     uint64_t vb_idx = 0;
-    for (uint64_t i = 0; i < nrows; i += vlen)
+    for (index_t i = 0; i < nrows; i += vlen)
     {
         total_vops += vrows_size[i];
         slice_width[vb_idx++] = vrows_size[i];
@@ -170,7 +170,7 @@ index_t *sellcs_get_task_groups(sellcs_matrix_t *matrix, index_t total_tasks, in
     uint64_t task_idx = 0;
     task_ptrs[task_idx++] = 0;
 
-    for (uint64_t s = 0; s < matrix->nslices; s++)
+    for (index_t s = 0; s < matrix->nslices; s++)
     {
         if ((task_nnz >= nnz_per_task) && !(s % unroll))
         {

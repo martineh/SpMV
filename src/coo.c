@@ -34,3 +34,10 @@ struct coo *create_coo(int rows, int columns, int nnz, struct mtx *mtx)
 
     return coo;
 }
+
+void free_coo(struct coo *coo) {
+    SPMV_FREE(coo->i);
+    SPMV_FREE(coo->j);
+    SPMV_FREE(coo->A);
+    SPMV_FREE(coo);
+}

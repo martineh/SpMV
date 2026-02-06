@@ -1,9 +1,10 @@
 #include "spmv.h"
 
-#include <arm_sve.h>
 
 #define SIMD_WIDTH 4
 
+/*
+#include <arm_sve.h>
 void mult_ell(struct ell *ell, double *x, double *y)
 {
   const svbool_t pg = svptrue_b64();
@@ -22,8 +23,9 @@ void mult_ell(struct ell *ell, double *x, double *y)
     svst1(pg, &y[b * SIMD_WIDTH], sum);
   }
 }
+*/
 
-void mult_ell_s(struct ell *ell, double *x, double *y)
+void mult_ell(struct ell *ell, double *x, double *y)
 {
     int r = ell->rows - ell->num_blocks * SIMD_WIDTH; // remainder rows
     for (int b = 0; b < ell->num_blocks; b++) {

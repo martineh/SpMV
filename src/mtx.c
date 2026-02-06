@@ -146,7 +146,7 @@ void load_bin(const char *fname, int *rows, int *columns, int *nnz, struct mtx *
 
     // read matrix size
     int m, n;
-    long nz;
+    size_t nz;
     if (fread(&m, sizeof(int), 1, f) != 1) {
         fprintf(stderr, "Error reading file: %s\n", fname);
         exit(1);
@@ -178,7 +178,7 @@ void load_bin(const char *fname, int *rows, int *columns, int *nnz, struct mtx *
             exit(1);
         }
     } else {
-        for (int k = 0; k < nz; k++) {
+        for (size_t k = 0; k < nz; k++) {
             int i, j;
             double x;
             if (fread(&i, sizeof(int), 1, f) != 1) {

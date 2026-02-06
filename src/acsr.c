@@ -1,14 +1,11 @@
 #include <cstdlib>
 #include <sys/prctl.h>
 #include <linux/prctl.h>
-#include <arm_sve.h>
-#include <arm_neon.h>
 #include <stdio.h>
 #include "acsr.h"
 
 
 //spmv base
-/*
 void mult_acsr (struct acsr *acsr, double *x, double *y) {
     for (int i = 0; i < acsr->rows; i++) {
         double sum = 0.0;
@@ -26,8 +23,10 @@ void mult_acsr (struct acsr *acsr, double *x, double *y) {
     }
 
 }
-*/
 
+
+/*
+#include <arm_sve.h>
 void mult_acsr (struct acsr *acsr, double *x, double *y) {
     int ret = prctl(PR_SVE_SET_VL, 16);
     if (ret < 0) { perror("prctl"); return; }
@@ -52,6 +51,7 @@ void mult_acsr (struct acsr *acsr, double *x, double *y) {
     ret = prctl(PR_SVE_SET_VL, 32);
     if (ret < 0) { perror("prctl"); return; }
 }
+*/
 
 /* Block for vlen=128, x2 doubles */
 struct acsr *create_acsr(int nrows, int ncols, int nnz, double *values, int *columns, int *row_ptr) {

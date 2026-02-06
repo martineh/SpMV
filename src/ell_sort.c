@@ -10,11 +10,11 @@ void mult_ell_sort(struct ell_sort *ell, double *x, double *y)
     int r = ell->rows - ell->num_blocks * SIMD_WIDTH; // remainder rows
     #pragma omp parallel for
     for (int b = 0; b < ell->num_blocks; b++) {
-        register v4df s = { 0 };
+        v4df s = { 0 };
         for (int l = ell->block_ptr[b]; l < ell->block_ptr[b + 1]; l += SIMD_WIDTH) {
-            register v4si vj = *(v4si *)(ell->j + l);
-            register v4df vx; for (int k = 0; k < SIMD_WIDTH; k++) vx[k] = x[vj[k]];
-            register v4df va = *(v4df *)(ell->A + l);
+            v4si vj = *(v4si *)(ell->j + l);
+            v4df vx; for (int k = 0; k < SIMD_WIDTH; k++) vx[k] = x[vj[k]];
+            v4df va = *(v4df *)(ell->A + l);
             s += vx * va;
         }
         if (b == ell->num_blocks - 1 && r > 0) {

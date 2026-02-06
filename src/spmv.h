@@ -3,12 +3,7 @@
 #include <time.h>
 #include <cstdint>
 
-#ifdef _OPENMP
 #include <omp.h>
-#else
-static inline int omp_get_thread_num(void) { return 0; }
-static inline int omp_get_max_threads(void) { return 1; }
-#endif
 
 // Sparse matrix declaration
 
@@ -39,6 +34,7 @@ struct csr {
 
 struct csr *create_csr_pad(int rows, int columns, int nnz, struct mtx *mtx);
 struct csr *create_csr(int rows, int columns, int nnz, int alignment, struct mtx *mtx);
+void free_csr(struct csr *csr);
 void mult_csr(struct csr *csr, double *x, double *y);
 void mult_csr_base(struct csr *csr, double *x, double *y);
 void mult_mv_csr(struct csr *csr, int n, double *x, double *y);
@@ -178,6 +174,7 @@ struct coo {
 };
 
 struct coo *create_coo(int rows, int columns, int nnz, struct mtx *coo);
+void free_coo(struct coo *coo);
 void mult_coo(struct coo *coo, double *x, double *y);
 
 // PCSR matrix
@@ -269,6 +266,8 @@ static inline void *spmv_alloc(size_t t, size_t l, const char *file, const char 
     }
     return p;
 }
+
+#define SPMV_FREE(t) free(t)
 
 static inline double get_time(void)
 {

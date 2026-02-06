@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <arm_sve.h>
 #include "sellp.h"
     
 struct mtx_coo {int i; int j; double a;};
 
+#ifdef SVE
+
+#include <arm_sve.h>
 #if SELLCS_BLOCK == 4
 void mult_sellp(struct sellp *sellp, double *x, double *y) {
     const svbool_t pg = svptrue_b64();
@@ -246,6 +248,7 @@ void mult_sellp(struct sellp *sellp, double *x, double *y) {
     }
 	
 }
+#endif
 
 #else
 void mult_sellp(struct sellp *sellp, double *x, double *y) {
@@ -369,3 +372,9 @@ struct sellp *create_sellp(int rows, int columns, int nnz, const int *row_ptr_cs
     return sellp;
 }
 
+
+void free_sellp(struct sellp *sellp) {
+    free(sellp->j);
+    free(sellp->A);
+    free(sellp->block_ptr);
+}

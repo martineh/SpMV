@@ -25,8 +25,8 @@ const uint64_t base_mod_mask = 0xF; // depends on base_p2
 // TODO VECTORIZE
 uint64_t get_max_value(index_t* order_vector, index_t start, index_t end)
 {
-    uint64_t max_val = order_vector[start];
-    for (size_t i = start + 1; i < end; i++)
+    index_t max_val = order_vector[start];
+    for (index_t i = start + 1; i < end; i++)
         if (order_vector[i] > max_val)
             max_val = order_vector[i];
 
@@ -48,7 +48,7 @@ void count_sort_paired_reversed(
 
     // Histogram of the CURRENT DIGIT values in ORDER_VECTOR;
     // Shifting by exp removes the previous digits already ordered
-    for (uint64_t i = start; i < end; i++) {
+    for (index_t i = start; i < end; i++) {
         uint64_t bin_id = (order_vector[i] >> exp) & base_mod_mask;
         bin_ptrs[bin_id]++;
     }
@@ -61,7 +61,7 @@ void count_sort_paired_reversed(
     }
 
     // Insert in order order_vector values to tmp_array ordered.
-    for (uint64_t i = start; i < end; i++) {
+    for (index_t i = start; i < end; i++) {
         const uint64_t bin_id = (order_vector[i] >> exp) & base_mod_mask;
         // Reverse the write index (position)
         const uint64_t write_at_index = len - bin_ptrs[bin_id];
@@ -109,12 +109,12 @@ index_t* get_order_by_row_size(index_t* rows_size, const index_t nrows, const si
     sellcs_check_malloc(row_order, "get_order_by_row_size.row_order\n");
 
     // Initialize full row_order between 0 and nrows - 1
-    for (uint64_t i = 0; i < nrows; i++) 
+    for (index_t i = 0; i < nrows; i++) 
         row_order[i] = i;
 
     #pragma omp parallel for schedule(dynamic, 1)
-    for (uint64_t k = 0; k < nrows; k += sigma_ordering_window){
-        index_t row_end = (k + sigma_ordering_window > nrows) ? nrows : k + sigma_ordering_window;
+    for (index_t k = 0; k < nrows; k += sigma_ordering_window){
+        index_t row_end = ((index_t)(k + sigma_ordering_window) > (index_t)nrows) ? nrows : k + sigma_ordering_window;
         radix_sort_paired_descending(&rows_size[0], &row_order[0], k, row_end);
     }
 
