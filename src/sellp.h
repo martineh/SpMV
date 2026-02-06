@@ -1,7 +1,4 @@
 
-#define SELLCS_BLOCK 16
-#define ALIGN_BYTES  128
-
 
 struct sellp {
     int rows;

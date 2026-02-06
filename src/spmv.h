@@ -5,9 +5,17 @@
 
 #include <omp.h>
 
-// Sparse matrix declaration
+#ifdef SVE_128
+  #define _BLOCK 2
+  #define ALIGN_BYTES 64
+#elif SVE_256
+  #define _BLOCK 4
+  #define ALIGN_BYTES 128
+#elif AVX2
+  #define _BLOCK 4
+  #define ALIGN_BYTES 32
+#endif
 
-// MTX matrix (COO array of struct)
 
 struct mtx { int i; int j; double a; };
 

@@ -1,7 +1,6 @@
 #include "spmv.h"
 #include <sys/prctl.h>
 
-#define ALIGNMENT 4
 
 void mult_csr_base(struct csr *csr, double *x, double *y)
 {
@@ -20,6 +19,7 @@ void mult_csr_base(struct csr *csr, double *x, double *y)
 #ifdef SVE
 
 #include <arm_sve.h>
+
 
 void mult_csr(struct csr *csr, double *x, double *y)
 {
@@ -42,26 +42,33 @@ void mult_csr(struct csr *csr, double *x, double *y)
 
 #include <immintrin.h>
 
+#define CSR_AVX2 4
+
 void mult_csr(struct csr *csr, double *x, double *y)
 {
+    int l;
     for (int k = 0; k < csr->rows; k++) {
         int *j = csr->j + csr->i[k];
         double *A = csr->A + csr->i[k];
         __m256d s = _mm256_setzero_pd();
-        for (int l = csr->i[k]; l < csr->i[k + 1]; l += 4) {
+        for (l = csr->i[k]; l < csr->i[k + 1] - (CSR_AVX2 - 1); l += CSR_AVX2) {
             __m128i vj = _mm_stream_load_si128((__m128i *)j);
             __m256d vx = _mm256_i32gather_pd(x, vj, 8);
             __m256d va = (__m256d)_mm256_stream_load_si256((__m256i *)A);
             s = _mm256_fmadd_pd(vx, va, s);
-            A += 4;
-            j += 4;
+            A += CSR_AVX2;
+            j += CSR_AVX2;
         }
+
         //y[k] = s[0] + s[1] + s[2] + s[3];
         __m128d a = _mm256_castpd256_pd128(s);
         __m128d b = _mm256_extractf128_pd(s, 1);
         __m128d c = _mm_add_pd(a, b);
         __m128d d = _mm_add_sd(c, _mm_unpackhi_pd(c, c));
         y[k] = _mm_cvtsd_f64(d);
+
+        for (; l < csr->i[k + 1]; l++) y[k] += x[*j++] * *A++;
+
     }
 }
 
@@ -70,7 +77,7 @@ void mult_csr(struct csr *csr, double *x, double *y)
 
 struct csr *create_csr_pad(int rows, int columns, int nnz, struct mtx *mtx)
 {
-    return create_csr(rows, columns, nnz, ALIGNMENT, mtx);
+    return create_csr(rows, columns, nnz, _BLOCK, mtx);
 }
 
 struct csr *create_csr(int rows, int columns, int nnz, int alignment, struct mtx *mtx)

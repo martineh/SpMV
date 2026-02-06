@@ -1,6 +1,4 @@
 
-#define ALIGN_BYTES  128
-
 struct acsr {
     double *v_values;
     int    *v_columns;

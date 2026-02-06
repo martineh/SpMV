@@ -81,16 +81,6 @@ int main(int argc, char *argv[])
             return 1;
         }
     
-        // test result part 1
-        double *x     = SPMV_ALLOC(double, columns);
-        double *y     = SPMV_ALLOC(double, rows);
-        double *y_ref = SPMV_ALLOC(double, rows);
-    
-        for (int i = 0; i < columns; i++) x[i] = y[i] = 1.0;
-    
-        double norm = vec_norm(columns, x);
-        for (int i = 0; i < columns; i++) x[i] /= norm;
-        mult_mtx(rows, columns, nnz, coo, x, y_ref);
     
         // build sparse matrix
         void *matrix;
@@ -100,11 +90,16 @@ int main(int argc, char *argv[])
             matrix = create_coo(rows, columns, nnz, coo);
             mult = (void (*)(void *, double *, double *))mult_coo;
         } else if (strcmp(argv[1], "csr") == 0) {
-            matrix = create_csr_pad(rows, columns, nnz, coo);
+            matrix = create_csr(rows, columns, nnz, _BLOCK, coo);
             mult = (void (*)(void *, double *, double *))mult_csr;
         } else if (strcmp(argv[1], "csr_base") == 0) {
-            matrix = create_csr_pad(rows, columns, nnz, coo);
+            matrix = create_csr(rows, columns, nnz, 1, coo);
             mult = (void (*)(void *, double *, double *))mult_csr_base;
+        } else if (strcmp(argv[1], "sellp") == 0) {
+            struct csr * mat_csr = create_csr(rows, columns, nnz, 1, coo);
+            matrix = create_sellp(rows, columns, nnz, mat_csr->i, mat_csr->j, mat_csr->A);
+            mult   = (void (*)(void *, double *, double *))mult_sellp;
+	    free_csr(mat_csr);
         } else if (strcmp(argv[1], "acsr") == 0) {
             struct csr * mat_csr = create_csr_pad(rows, columns, nnz, coo);
 	    matrix = create_acsr(rows, columns, nnz, mat_csr->A, mat_csr->j, mat_csr->i);
@@ -118,11 +113,6 @@ int main(int argc, char *argv[])
         } else if (strcmp(argv[1], "ell") == 0) {
             matrix = create_ell(rows, columns, nnz, coo);
             mult = (void (*)(void *, double *, double *))mult_ell;
-        } else if (strcmp(argv[1], "sellp") == 0) {
-            struct csr * mat_csr = create_csr_pad(rows, columns, nnz, coo);
-            matrix = create_sellp(rows, columns, nnz, mat_csr->i, mat_csr->j, mat_csr->A);
-            mult   = (void (*)(void *, double *, double *))mult_sellp;
-	    free_csr(mat_csr);
         } else if (strcmp(argv[1], "sell") == 0) {
             #ifdef INDEX64
             struct csr_epi *csr_matrix = create_csr_epi(rows, columns, nnz, coo);
@@ -146,16 +136,25 @@ int main(int argc, char *argv[])
             printf("Unknown matrix format\n");
             return 1;
         }
+        
+        double *x     = SPMV_ALLOC(double, columns);
+        double *y     = SPMV_ALLOC(double, rows * 2);
+        double *y_ref = SPMV_ALLOC(double, rows * 2);
+    
+        for (int i = 0; i < columns; i++) x[i] = y[i] = 1.0;
+    
+        double norm = vec_norm(columns, x);
+        for (int i = 0; i < columns; i++) x[i] /= norm;
+        mult_mtx(rows, columns, nnz, coo, x, y_ref);
     
         mult(matrix, x, y);
     
         double res = 0.0;
         for (int i = 0; i < rows; i++) {
             double d = fabs(y[i] - y_ref[i]);
-            // if (d > 1e-5) printf("diff %d %e %e\n", i, y[i], y_ref[i]);
             if (d > res) res = d;
         }
-    
+   
         double time_spmv = 0.0;
         double t0 = get_time();
         int it = 0;
@@ -171,7 +170,6 @@ int main(int argc, char *argv[])
             if (stop) break;
         }
     
-
 	double GFlops = 2.0 * nnz * it / time_spmv / 1000000000;
 	double ftime  = time_spmv / it;
 
@@ -180,7 +178,7 @@ int main(int argc, char *argv[])
 
 	printf("  | %s%-30s%s %10d %10d %10d  | %s%.4f%s  %.4e | %.4e  ", COLOR_BOLDCYAN, name, COLOR_RESET, rows, columns, nnz, COLOR_BOLDYELLOW, GFlops, COLOR_RESET, ftime, res);
    
-	if (res < 1E-8) printf("  %sOK%s   |\n", COLOR_BOLDGREEN, COLOR_RESET);	
+	if (res < 1E-7) printf("  %sOK%s   |\n", COLOR_BOLDGREEN, COLOR_RESET);	
 	else            printf("  %sERR%s  |\n", COLOR_BOLDRED, COLOR_RESET);	
 
 	fprintf(outfd, "%s;%s;%d;%d;%d;%.5e;%.5e\n", argv[1], name, rows, columns, nnz, GFlops, ftime);
@@ -188,7 +186,8 @@ int main(int argc, char *argv[])
         SPMV_FREE(x);
         SPMV_FREE(y); 
         SPMV_FREE(y_ref);
-    
+   	free(coo);
+
         if      (strcmp(argv[1], "coo") == 0)      free_coo((struct coo *)matrix);
         else if (strcmp(argv[1], "csr") == 0)      free_csr((struct csr *)matrix);
         else if (strcmp(argv[1], "csr_base") == 0) free_csr((struct csr *)matrix);

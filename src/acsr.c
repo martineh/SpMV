@@ -58,9 +58,9 @@ struct acsr *create_acsr(int nrows, int ncols, int nnz, double *values, int *col
 
     int capacity = row_ptr[nrows] * 2;
 
-    double *v_values  = (double *)aligned_alloc(ALIGN_BYTES, sizeof(double) * capacity);
-    int    *v_columns = (int *)aligned_alloc(ALIGN_BYTES,sizeof(int) * capacity);
-    int    *v_rowptr  = (int *)aligned_alloc(ALIGN_BYTES,sizeof(int) * (nrows + 1));
+    double *v_values  = (double *)aligned_alloc(32, sizeof(double) * capacity);
+    int    *v_columns = (int *)aligned_alloc(32,sizeof(int) * capacity);
+    int    *v_rowptr  = (int *)aligned_alloc(32,sizeof(int) * (nrows + 1));
 
     int vec_count = 0;
     int dist, start, end;
@@ -92,7 +92,7 @@ struct acsr *create_acsr(int nrows, int ncols, int nnz, double *values, int *col
     }
     v_rowptr[nrows] = vec_count;
 
-    struct acsr *acsr = (struct acsr *)aligned_alloc(ALIGN_BYTES, sizeof(*acsr));
+    struct acsr *acsr = (struct acsr *)aligned_alloc(32, sizeof(*acsr));
 
     acsr->v_values    = v_values;
     acsr->v_columns   = v_columns;

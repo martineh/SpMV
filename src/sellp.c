@@ -2,37 +2,20 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "sellp.h"
+#include "spmv.h"
     
 struct mtx_coo {int i; int j; double a;};
 
-#ifdef SVE
+#if defined(SVE_128) || defined(SVE_256)
 
 #include <arm_sve.h>
-#if SELLCS_BLOCK == 4
-void mult_sellp(struct sellp *sellp, double *x, double *y) {
-    const svbool_t pg = svptrue_b64();
-    const svfloat64_t zeros = svdup_n_f64(0);
-    svfloat64_t va, vx, vprod;
-    svint64_t vidx;
-    size_t vl;
-    for (int b = 0; b < sellp->num_blocks; b++) {
-        svfloat64_t sum = zeros;
-        for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b + 1]; l += SELLCS_BLOCK) {
 
-            svfloat64_t val        = svld1(pg, &sellp->A[l]);
-            svint64_t col          = svld1sw_s64(pg, &sellp->j[l]);
-            svfloat64_t b_vals_vec = svld1_gather_index(pg, x, col);
-            sum                    = svmla_m(pg, sum, val, b_vals_vec);
-        }
-        svst1(pg, &y[b * SELLCS_BLOCK], sum);
-    }
-}
-
-#elif SELLCS_BLOCK == 8
+#if _BLOCK == 8
 
 //Base implementation
-void mult_sellp_x(struct sellp *sellp, double *x, double *y) {
+void mult_sellp_b8(struct sellp *sellp, double *x, double *y) {
     const svbool_t pg = svptrue_b64();
     const svfloat64_t zeros = svdup_n_f64(0);
     svfloat64_t va, vx, vprod;
@@ -50,7 +33,7 @@ void mult_sellp_x(struct sellp *sellp, double *x, double *y) {
 	__builtin_prefetch((const char *)&sellp->A[bstart + 8], 0, 3);
 	__builtin_prefetch((const char *)&sellp->j[bstart + 8], 0, 3);
 
-        for (int l = bstart; l < bend; l += SELLCS_BLOCK) {
+        for (int l = bstart; l < bend; l += _BLOCK) {
 
             svfloat64_t val0   = svld1(pg, &sellp->A[l]);
             svfloat64_t val1   = svld1(pg, &sellp->A[l+4]);
@@ -64,8 +47,8 @@ void mult_sellp_x(struct sellp *sellp, double *x, double *y) {
             sum0               = svmla_m(pg, sum0, val0, bvals0);
             sum1               = svmla_m(pg, sum1, val1, bvals1);
         }
-        svst1(pg, &y[b * SELLCS_BLOCK],   sum0);
-        svst1(pg, &y[b * SELLCS_BLOCK+4], sum1);
+        svst1(pg, &y[b * _BLOCK],   sum0);
+        svst1(pg, &y[b * _BLOCK+4], sum1);
 	
     }
 }
@@ -159,8 +142,8 @@ void mult_sellp(struct sellp *sellp, double *x, double *y) {
             S0 = svmla_m(pg, S0, A4, X4);
             S1 = svmla_m(pg, S1, A5, X5);
         
-            svst1(pg, &y[b * SELLCS_BLOCK],   S0);
-            svst1(pg, &y[b * SELLCS_BLOCK+4], S1);
+            svst1(pg, &y[b * _BLOCK],   S0);
+            svst1(pg, &y[b * _BLOCK+4], S1);
 	} else {
 	    __builtin_prefetch((const char *)&sellp->A[bstart + 8], 0, 3);
 	    __builtin_prefetch((const char *)&sellp->j[bstart + 8], 0, 3);
@@ -177,7 +160,7 @@ void mult_sellp(struct sellp *sellp, double *x, double *y) {
             sum0               = svmul_f64_m(pg, val0, bvals0);
             sum1               = svmul_f64_m(pg, val1, bvals1);
 
-            for (int l = bstart + SELLCS_BLOCK; l < bend; l += SELLCS_BLOCK) {
+            for (int l = bstart + _BLOCK; l < bend; l += _BLOCK) {
     
                 svfloat64_t val0   = svld1(pg, &sellp->A[l]);
                 svfloat64_t val1   = svld1(pg, &sellp->A[l+4]);
@@ -191,14 +174,14 @@ void mult_sellp(struct sellp *sellp, double *x, double *y) {
                 sum0               = svmla_m(pg, sum0, val0, bvals0);
                 sum1               = svmla_m(pg, sum1, val1, bvals1);
             }
-            svst1(pg, &y[b * SELLCS_BLOCK],   sum0);
-            svst1(pg, &y[b * SELLCS_BLOCK+4], sum1);
+            svst1(pg, &y[b * _BLOCK],   sum0);
+            svst1(pg, &y[b * _BLOCK+4], sum1);
 	}
 	
     }
 }
 
-#elif SELLCS_BLOCK == 16
+#elif _BLOCK == 16
 
 void mult_sellp(struct sellp *sellp, double *x, double *y) {
     const svbool_t pg = svptrue_b64();
@@ -218,7 +201,7 @@ void mult_sellp(struct sellp *sellp, double *x, double *y) {
 	__builtin_prefetch((const char *)&sellp->A[bstart + 8], 0, 3);
 	__builtin_prefetch((const char *)&sellp->j[bstart + 8], 0, 3);
     
-        for (int l = bstart; l < bend; l += SELLCS_BLOCK) {
+        for (int l = bstart; l < bend; l += _BLOCK) {
     
             svfloat64_t val0   = svld1(pg, &sellp->A[l]);
             svfloat64_t val1   = svld1(pg, &sellp->A[l+4]);
@@ -241,23 +224,78 @@ void mult_sellp(struct sellp *sellp, double *x, double *y) {
             sum3               = svmla_m(pg, sum3, val3, bvals3);
         }
 
-        svst1(pg, &y[b * SELLCS_BLOCK+0],  sum0);
-        svst1(pg, &y[b * SELLCS_BLOCK+4],  sum1);
-        svst1(pg, &y[b * SELLCS_BLOCK+8],  sum2);
-        svst1(pg, &y[b * SELLCS_BLOCK+12], sum3);
+        svst1(pg, &y[b * _BLOCK+0],  sum0);
+        svst1(pg, &y[b * _BLOCK+4],  sum1);
+        svst1(pg, &y[b * _BLOCK+8],  sum2);
+        svst1(pg, &y[b * _BLOCK+12], sum3);
     }
 	
 }
-#endif
 
 #else
+
 void mult_sellp(struct sellp *sellp, double *x, double *y) {
- //TODO: 
- return;
+    const svbool_t pg = svptrue_b64();
+    const svfloat64_t zeros = svdup_n_f64(0);
+    svfloat64_t va, vx, vprod;
+    svint64_t vidx;
+    size_t vl;
+    for (int b = 0; b < sellp->num_blocks; b++) {
+        svfloat64_t sum = zeros;
+        for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b + 1]; l += _BLOCK) {
+
+            svfloat64_t val        = svld1(pg, &sellp->A[l]);
+            svint64_t col          = svld1sw_s64(pg, &sellp->j[l]);
+            svfloat64_t b_vals_vec = svld1_gather_index(pg, x, col);
+            sum                    = svmla_m(pg, sum, val, b_vals_vec);
+        }
+        svst1(pg, &y[b * _BLOCK], sum);
+    }
 }
+
 #endif
 
-int by_row_mtx(const struct mtx_coo *a, const struct mtx_coo *b) {
+#elif AVX2
+
+#include <immintrin.h>
+
+void mult_sellp(struct sellp *sellp, double *x, double *y) {
+    for (int b = 0; b < sellp->num_blocks; b++) {
+        __m256d s = _mm256_setzero_pd();
+        for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b + 1]; l += _BLOCK) {
+            __m256d va = _mm256_castsi256_pd(_mm256_stream_load_si256((__m256i *)&sellp->A[l]));
+            __m128i vj = _mm_stream_load_si128((__m128i *)&sellp->j[l]);
+            __m256d vx = _mm256_i32gather_pd(x, vj, 8);
+            s = _mm256_fmadd_pd(vx, va, s);
+        }
+        _mm256_stream_pd(&y[b * _BLOCK], s);
+    }
+}
+
+/*
+void mult_sellp(struct sellp *ell, double *x, double *y)
+{
+    int r = ell->rows - ell->num_blocks * _BLOCK; // remainder rows
+    for (int b = 0; b < ell->num_blocks; b++) {
+        double t[_BLOCK];
+        for (int s = 0; s < _BLOCK; s++) t[s] = 0;
+        for (int l = ell->block_ptr[b]; l < ell->block_ptr[b + 1]; l += _BLOCK) {
+            for (int s = 0; s < _BLOCK; s++) {
+                t[s] += x[ell->j[l + s]] * ell->A[l + s];
+            }
+        }
+        if (b == ell->num_blocks - 1 && r > 0) {
+            for (int s = 0; s < r; s++) y[b * _BLOCK + s] = t[s];
+        } else {
+            for (int s = 0; s < _BLOCK; s++) y[b * _BLOCK + s] = t[s];
+        }
+    }
+}
+*/
+
+#endif
+
+int by_row(const struct mtx_coo *a, const struct mtx_coo *b) {
     if (a->i < b->i) return -1;
     if (a->i > b->i) return 1;
     if (a->j < b->j) return -1;
@@ -274,8 +312,8 @@ struct sellp *create_sellp(int rows, int columns, int nnz, const int *row_ptr_cs
     sellp->nnz = nnz;
 
     // Número de bloques
-    int num_blocks = rows / SELLCS_BLOCK;
-    if (rows % SELLCS_BLOCK) num_blocks++;
+    int num_blocks = rows / _BLOCK;
+    if (rows % _BLOCK) num_blocks++;
     sellp->num_blocks = num_blocks;
 
     // block_ptr alineado
@@ -299,25 +337,26 @@ struct sellp *create_sellp(int rows, int columns, int nnz, const int *row_ptr_cs
         }
     }
 
+
     // Ordenar por filas, columnas
     bool sorted = true;
     int ii = 1;
     while (sorted && ii < nnz) {
-        if (by_row_mtx(&mtx[ii-1], &mtx[ii]) == 1) sorted = false;
+        if (by_row(&mtx[ii-1], &mtx[ii]) == 1) sorted = false;
         ii++;
     }
     if (!sorted) {
         qsort(mtx, nnz, sizeof(struct mtx_coo),
-              (int (*)(const void *, const void *))by_row_mtx);
+              (int (*)(const void *, const void *))by_row);
     }
 
     // Construir row_ptr temporal
     int *row_ptr_temp;
-    if (posix_memalign((void**)&row_ptr_temp, ALIGN_BYTES, sizeof(int) * (num_blocks * SELLCS_BLOCK + 1))) {
+    if (posix_memalign((void**)&row_ptr_temp, ALIGN_BYTES, sizeof(int) * (num_blocks * _BLOCK + 1))) {
         perror("posix_memalign row_ptr"); exit(1);
     }
     row_ptr_temp[0] = 0;
-    for (int l = 0, k = 0; k < num_blocks * SELLCS_BLOCK; k++) {
+    for (int l = 0, k = 0; k < num_blocks * _BLOCK; k++) {
         while (l < nnz && mtx[l].i == k) l++;
         row_ptr_temp[k + 1] = l;
     }
@@ -326,13 +365,13 @@ struct sellp *create_sellp(int rows, int columns, int nnz, const int *row_ptr_cs
     sellp->block_ptr[0] = 0;
     for (int p = 0, b = 0; b < num_blocks; b++) {
         int max_length = 0;
-        for (int s = 0; s < SELLCS_BLOCK; s++) {
-            int row_len = row_ptr_temp[b * SELLCS_BLOCK + s + 1] -
-                          row_ptr_temp[b * SELLCS_BLOCK + s];
+        for (int s = 0; s < _BLOCK; s++) {
+            int row_len = row_ptr_temp[b * _BLOCK + s + 1] -
+                          row_ptr_temp[b * _BLOCK + s];
             if (row_len > max_length) max_length = row_len;
         }
         p += max_length;
-        sellp->block_ptr[b + 1] = p * SELLCS_BLOCK;
+        sellp->block_ptr[b + 1] = p * _BLOCK;
     }
 
     int l_total = sellp->block_ptr[num_blocks];
@@ -346,21 +385,21 @@ struct sellp *create_sellp(int rows, int columns, int nnz, const int *row_ptr_cs
 
     // Llenar la matriz SELL-P
     for (int b = 0; b < num_blocks; b++) {
-        int row_len[SELLCS_BLOCK];
-        for (int s = 0; s < SELLCS_BLOCK; s++) {
-            row_len[s] = row_ptr_temp[b * SELLCS_BLOCK + s + 1] -
-                         row_ptr_temp[b * SELLCS_BLOCK + s];
+        int row_len[_BLOCK];
+        for (int s = 0; s < _BLOCK; s++) {
+            row_len[s] = row_ptr_temp[b * _BLOCK + s + 1] -
+                         row_ptr_temp[b * _BLOCK + s];
         }
 
-        for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b+1]; l += SELLCS_BLOCK) {
-            for (int s = 0; s < SELLCS_BLOCK; s++) {
+        for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b+1]; l += _BLOCK) {
+            for (int s = 0; s < _BLOCK; s++) {
                 if (row_len[s] == 0) { // padding
                     sellp->j[l + s] = 0;
                     sellp->A[l + s] = 0.0;
                 } else {
-                    sellp->j[l + s] = mtx[row_ptr_temp[b * SELLCS_BLOCK + s]].j;
-                    sellp->A[l + s] = mtx[row_ptr_temp[b * SELLCS_BLOCK + s]].a;
-                    row_ptr_temp[b * SELLCS_BLOCK + s]++;
+                    sellp->j[l + s] = mtx[row_ptr_temp[b * _BLOCK + s]].j;
+                    sellp->A[l + s] = mtx[row_ptr_temp[b * _BLOCK + s]].a;
+                    row_ptr_temp[b * _BLOCK + s]++;
                     row_len[s]--;
                 }
             }
