@@ -1,6 +1,0 @@
-Format;File;Rows;Columns;NNZ;GFlops;Time(s)
-csr;/home/hmartinez/workspace/symetric_mtx/matrix//2cubes_sphere.mtx;101492;101492;1647264;1.79676e+00;1.83359e-03
-csr;/home/hmartinez/workspace/symetric_mtx/matrix//af_0_k101.mtx;503625;503625;17550675;2.67572e+00;1.31185e-02
-csr;/home/hmartinez/workspace/symetric_mtx/matrix//af_shell10.mtx;1508065;1508065;52259885;2.50721e+00;4.16876e-02
-csr;/home/hmartinez/workspace/symetric_mtx/matrix//af_shell1.mtx;504855;504855;17562051;2.70272e+00;1.29958e-02
-csr;/home/hmartinez/workspace/symetric_mtx/matrix//analytics.mtx;303813;303813;2006126;1.31289e+00;3.05605e-03

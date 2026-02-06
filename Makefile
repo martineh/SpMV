@@ -1,5 +1,6 @@
+include Makefile.inc
+
 CC = g++
-ARCH=AVX2
 
 ifeq ($(ARCH), AVX2)
 	CFLAGS=-DAVX2 -mavx2 -mfma

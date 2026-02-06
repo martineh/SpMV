@@ -8,6 +8,8 @@
 #include "sellp.h"
 #include "acsr.h"
 
+#include "colors.h"
+
 #define MAX_PATH_LEN 1024
 
 double vec_norm(int n, double *x)
@@ -23,8 +25,8 @@ int main(int argc, char *argv[])
     struct mtx *coo;
 
     // get parallel configuration
-    int np = 1;
-    int max_threads = omp_get_max_threads();
+    //int np = 1;
+    //int max_threads = omp_get_max_threads();
 
     FILE *infd, *outfd;
     char line[MAX_PATH_LEN];
@@ -44,6 +46,22 @@ int main(int argc, char *argv[])
     }
 	
     fprintf(outfd, "Format;File;Rows;Columns;NNZ;GFlops;Time(s)\n");
+
+
+    printf("\n\n");
+    printf("  +============================================================================================================+\n");
+    printf("  |%s                                             I N P U T    D A T A                                           %s|\n", COLOR_BOLDYELLOW, COLOR_RESET);
+    printf("  +============================================================================================================+\n");
+    printf("  | Format           :   %s%-80s%s      |\n", COLOR_BOLDCYAN, argv[1], COLOR_RESET);
+    printf("  | Input Matrix List:   %s%-80s%s      |\n", COLOR_BOLDCYAN, argv[2], COLOR_RESET);
+    printf("  | Outpt CSV        :   %s%-80s%s      |\n", COLOR_BOLDCYAN, argv[3], COLOR_RESET);
+    printf("  +============================================================================================================+\n\n");
+
+    printf("  +============================================================================================================+\n");
+    printf("  |%s                                     D R I V E R    F O R    S P M V                                        %s|\n", COLOR_BOLDYELLOW, COLOR_RESET);
+    printf("  +============================================================================================================+\n");
+    printf("  |%s  Matrix                             ROWS      COLUMNS     NNZ    | GFlops      T(s)   |    ERROR     Test  |%s\n", COLOR_RESET, COLOR_RESET);
+    printf("  +============================================================================================================+\n");
 
     while (fgets(line, sizeof(line), infd) != NULL) {
         line[strcspn(line, "\n")] = '\0'; 
@@ -157,14 +175,15 @@ int main(int argc, char *argv[])
 	double GFlops = 2.0 * nnz * it / time_spmv / 1000000000;
 	double ftime  = time_spmv / it;
 
-        printf("%s %s %i %i %i %i %i %.4f %e %i %e %e\n",
-                argv[1], line, max_threads, np,
-                rows, columns, nnz,
-                GFlops,
-                ftime,
-                it, res, (double)((struct csr *)matrix)->memusage);
-    
-	fprintf(outfd, "%s;%s;%d;%d;%d;%.5e;%.5e\n", argv[1], line, rows, columns, nnz, GFlops, ftime);
+	char *name = strrchr(line, '/');
+	name++;
+
+	printf("  | %s%-30s%s %10d %10d %10d  | %s%.4f%s  %.4e | %.4e  ", COLOR_BOLDCYAN, name, COLOR_RESET, rows, columns, nnz, COLOR_BOLDYELLOW, GFlops, COLOR_RESET, ftime, res);
+   
+	if (res < 1E-8) printf("  %sOK%s   |\n", COLOR_BOLDGREEN, COLOR_RESET);	
+	else            printf("  %sERR%s  |\n", COLOR_BOLDRED, COLOR_RESET);	
+
+	fprintf(outfd, "%s;%s;%d;%d;%d;%.5e;%.5e\n", argv[1], name, rows, columns, nnz, GFlops, ftime);
 
         SPMV_FREE(x);
         SPMV_FREE(y); 
@@ -177,6 +196,8 @@ int main(int argc, char *argv[])
     
     }
 
+    printf("  +============================================================================================================+\n");
+    printf("\n\n");
     fclose(infd);
     fclose(outfd);
 
