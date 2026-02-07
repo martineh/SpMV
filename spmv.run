@@ -8,9 +8,9 @@ LIST=matrix_lists/symetric.txt
 
 #----------------------------------------------
 # Select the matrix format. Avail:
-#    > csr
-#    > csr_base
-#    > sellp
+#    [*] csr
+#    [*] csr_base
+#    [*] sellp
 #----------------------------------------------
 MODE=sellp
 #----------------------------------------------

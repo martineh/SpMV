@@ -270,6 +270,7 @@ void mult_sellp(struct sellp *sellp, double *x, double *y) {
         }
         _mm256_stream_pd(&y[b * _BLOCK], s);
     }
+    
 }
 
 /*
