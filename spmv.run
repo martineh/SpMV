@@ -3,16 +3,18 @@
 #----------------------------------------------
 # Select the matrix list file name
 #----------------------------------------------
-LIST=matrix_lists/symetric.txt
+LIST=matrix_lists/matrix_list_160.txt
 #----------------------------------------------
 
 #----------------------------------------------
 # Select the matrix format. Avail:
-#    [*] csr
 #    [*] csr_base
-#    [*] sellp
+#    [*] csr_vec
+#    [*] csr_highway
+#    [*] sellp_vec
+#    [*] sellp_highway (TODO)
 #----------------------------------------------
-MODE=sellp
+MODE=sellp_vec
 #----------------------------------------------
 
 #----------------------------------------------
@@ -21,6 +23,7 @@ MODE=sellp
 OUT=output
 #----------------------------------------------
 
+export OMP_NUM_THREADS=1
 
 BIND="taskset -c 0 "
 

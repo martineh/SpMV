@@ -1,5 +1,1 @@
-/home/hmartinez/workspace/symetric_mtx/matrix//2cubes_sphere.mtx
-/home/hmartinez/workspace/symetric_mtx/matrix//af_0_k101.mtx
-/home/hmartinez/workspace/symetric_mtx/matrix//af_shell10.mtx
-/home/hmartinez/workspace/symetric_mtx/matrix//af_shell1.mtx
-/home/hmartinez/workspace/symetric_mtx/matrix//analytics.mtx
+matrix/ship_003/ship_003.mtx

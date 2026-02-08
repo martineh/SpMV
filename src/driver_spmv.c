@@ -9,7 +9,7 @@
 #include "spmv.h"
 #include "sellp.h"
 #include "acsr.h"
-
+#include "go_highway/csr_highway.h"
 #include "colors.h"
 
 #define MAX_PATH_LEN 1024
@@ -43,7 +43,7 @@ unsigned long available_memory() {
     return memoria_kb;
 }
 
-int enought_memory(const char *fpath, int *orows, int *ocols, int *onnz) {
+int enought_memory(const char *fpath, int *orows, int *ocols, int *onnz, unsigned long *onecessary_mem) {
     FILE *f = fopen(fpath, "r");
     if (f == NULL) {
         perror("Error al abrir el fichero");
@@ -94,9 +94,10 @@ int enought_memory(const char *fpath, int *orows, int *ocols, int *onnz) {
     free_memory   = free_memory  / (1024);
 
     // Imprimir para depuración (opcional)
-    printf("Necesaria: %lu MB | Disponible: %lu MB\n", 
-            necessary_mem, free_memory);
+    //printf("Necesaria: %lu MB | Disponible: %lu MB\n", 
+            //necessary_mem, free_memory);
 
+    *onecessary_mem = necessary_mem;
     *orows = (int)rows;
     *ocols = (int)cols;
     *onnz  = (int)nnz;
@@ -106,6 +107,7 @@ int enought_memory(const char *fpath, int *orows, int *ocols, int *onnz) {
 
 int main(int argc, char *argv[])
 {
+    unsigned long necessary_mem;
     int rows, columns, nnz;
     struct mtx *coo;
 
@@ -134,19 +136,19 @@ int main(int argc, char *argv[])
 
 
     printf("\n\n");
-    printf("  +============================================================================================================+\n");
-    printf("  |%s                                             I N P U T    D A T A                                           %s|\n", COLOR_BOLDYELLOW, COLOR_RESET);
-    printf("  +============================================================================================================+\n");
-    printf("  | Format           :   %s%-80s%s      |\n", COLOR_BOLDCYAN, argv[1], COLOR_RESET);
-    printf("  | Input Matrix List:   %s%-80s%s      |\n", COLOR_BOLDCYAN, argv[2], COLOR_RESET);
-    printf("  | Outpt CSV        :   %s%-80s%s      |\n", COLOR_BOLDCYAN, argv[3], COLOR_RESET);
-    printf("  +============================================================================================================+\n\n");
+    printf("  +======================================================================================================================+\n");
+    printf("  |%s                                                  I N P U T    D A T A                                                %s|\n", COLOR_BOLDYELLOW, COLOR_RESET);
+    printf("  +======================================================================================================================+\n");
+    printf("  | Format           :   %s%-90s%s      |\n", COLOR_BOLDCYAN, argv[1], COLOR_RESET);
+    printf("  | Input Matrix List:   %s%-90s%s      |\n", COLOR_BOLDCYAN, argv[2], COLOR_RESET);
+    printf("  | Outpt CSV        :   %s%-90s%s      |\n", COLOR_BOLDCYAN, argv[3], COLOR_RESET);
+    printf("  +======================================================================================================================+\n\n");
 
-    printf("  +============================================================================================================+\n");
-    printf("  |%s                                     D R I V E R    F O R    S P M V                                        %s|\n", COLOR_BOLDYELLOW, COLOR_RESET);
-    printf("  +============================================================================================================+\n");
-    printf("  |%s  Matrix                             ROWS      COLUMNS     NNZ    | GFlops      T(s)   |    ERROR     Test  |%s\n", COLOR_RESET, COLOR_RESET);
-    printf("  +============================================================================================================+\n");
+    printf("  +======================================================================================================================+\n");
+    printf("  |%s                                          D R I V E R    F O R    S P M V                                             %s|\n", COLOR_BOLDYELLOW, COLOR_RESET);
+    printf("  +======================================================================================================================+\n");
+    printf("  |%s  Matrix                             ROWS      COLUMNS     NNZ    | GFlops      T(s)    Mem (Mb) |    ERROR     Test  |%s\n", COLOR_RESET, COLOR_RESET);
+    printf("  +======================================================================================================================+\n");
 
     while (fgets(line, sizeof(line), infd) != NULL) {
         line[strcspn(line, "\n")] = '\0'; 
@@ -156,7 +158,7 @@ int main(int argc, char *argv[])
 	name++;
 
 	//Check for necessary memory
-        if (enought_memory(line, &rows, &columns, &nnz)) {
+        if (enought_memory(line, &rows, &columns, &nnz, &necessary_mem)) {
 
             if (p != NULL && strcmp(p, ".bin") == 0) {
                 load_bin(line, &rows, &columns, &nnz, &coo);
@@ -180,17 +182,29 @@ int main(int argc, char *argv[])
             if (strcmp(argv[1], "coo") == 0) {
                 matrix = create_coo(rows, columns, nnz, coo);
                 mult = (void (*)(void *, double *, double *))mult_coo;
-            } else if (strcmp(argv[1], "csr") == 0) {
+            } else if (strcmp(argv[1], "csr_vec") == 0) {
                 matrix = create_csr(rows, columns, nnz, _BLOCK, coo);
                 mult = (void (*)(void *, double *, double *))mult_csr;
             } else if (strcmp(argv[1], "csr_base") == 0) {
                 matrix = create_csr(rows, columns, nnz, 1, coo);
                 mult = (void (*)(void *, double *, double *))mult_csr_base;
-            } else if (strcmp(argv[1], "sellp") == 0) {
+            } else if (strcmp(argv[1], "csr_highway") == 0) {
+                matrix = create_csr(rows, columns, nnz, _BLOCK, coo);
+                mult = (void (*)(void *, double *, double *))mult_csr_highway;
+            } else if (strcmp(argv[1], "sellp_vec") == 0) {
                 struct csr * mat_csr = create_csr(rows, columns, nnz, 1, coo);
                 matrix = create_sellp(rows, columns, nnz, mat_csr->i, mat_csr->j, mat_csr->A);
-                mult   = (void (*)(void *, double *, double *))mult_sellp;
 	        free_csr(mat_csr);
+                mult   = (void (*)(void *, double *, double *))mult_sellp;
+            } else if (strcmp(argv[1], "sellp_highway") == 0) {
+                struct csr * mat_csr = create_csr(rows, columns, nnz, 1, coo);
+                matrix = create_sellp(rows, columns, nnz, mat_csr->i, mat_csr->j, mat_csr->A);
+	        free_csr(mat_csr);
+		//TODO: Implementation of sellp for Highway! Uncomment the next line with the
+		//      implemented routine.
+                //mult   = (void (*)(void *, double *, double *))mult_sellp; 
+		printf("ERROR: SELLP for Google Highway not implemented\n");
+		exit(-1);
             } else if (strcmp(argv[1], "acsr") == 0) {
                 struct csr * mat_csr = create_csr_pad(rows, columns, nnz, coo);
 	        matrix = create_acsr(rows, columns, nnz, mat_csr->A, mat_csr->j, mat_csr->i);
@@ -232,19 +246,30 @@ int main(int argc, char *argv[])
             double *y     = SPMV_ALLOC(double, rows + 64);
             double *y_ref = SPMV_ALLOC(double, rows);
         
-            for (int i = 0; i < columns; i++) x[i] = y[i] = 1.0;
-        
+            for (int i = 0; i < columns; i++) { 
+		    x[i] = ((double) rand()) / RAND_MAX;
+		    y[i] = ((double) rand()) / RAND_MAX;
+	    }
+
             double norm = vec_norm(columns, x);
             for (int i = 0; i < columns; i++) x[i] /= norm;
             mult_mtx(rows, columns, nnz, coo, x, y_ref);
         
             mult(matrix, x, y);
-        
-            double res = 0.0;
-            for (int i = 0; i < rows; i++) {
-                double d = fabs(y[i] - y_ref[i]);
-                if (d > res) res = d;
-            }
+      
+           double error = 0.0;
+           double nrm   = 0.0;
+
+           for (int i = 0; i < rows; i++) {
+               double tmp = y_ref[i];
+               nrm       += tmp *tmp;
+               tmp        = fabs(y[i] - y_ref[i]);
+               error     += tmp * tmp;
+           }
+
+           if (nrm != 0.0) error = sqrt(error) / sqrt(nrm);
+           else            error = sqrt(error);
+
        
             double time_spmv = 0.0;
             double t0 = get_time();
@@ -265,9 +290,10 @@ int main(int argc, char *argv[])
 	    double ftime  = time_spmv / it;
     
 
-	    printf("  | %s%-30s%s %10d %10d %10d  | %s%.4f%s  %.4e | %.4e  ", COLOR_BOLDCYAN, name, COLOR_RESET, rows, columns, nnz, COLOR_BOLDYELLOW, GFlops, COLOR_RESET, ftime, res);
-	    if (res < 1E-7) printf("  %sOK%s   |\n", COLOR_BOLDGREEN, COLOR_RESET);	
-	    else            printf("  %sERR%s  |\n", COLOR_BOLDRED, COLOR_RESET);	
+	    printf("  | %s%-30s%s %10d %10d %10d  | %s%.4f%s  %.4e  %8ld | %.4e  ", COLOR_BOLDCYAN, name, COLOR_RESET, rows, columns, nnz, 
+			                                                            COLOR_BOLDYELLOW, GFlops, COLOR_RESET, ftime, necessary_mem, error);
+	    if (error < 1E-10) printf("  %sOK%s   |\n", COLOR_BOLDGREEN, COLOR_RESET);	
+	    else               printf("  %sERR%s  |\n", COLOR_BOLDRED, COLOR_RESET);	
     
 	    fprintf(outfd, "%s;%s;%d;%d;%d;%.5e;%.5e\n", argv[1], name, rows, columns, nnz, GFlops, ftime);
     
@@ -281,13 +307,15 @@ int main(int argc, char *argv[])
             else if (strcmp(argv[1], "csr_base") == 0) free_csr((struct csr *)matrix);
             else if (strcmp(argv[1], "sellp") == 0)    free_sellp((struct sellp *)matrix);
 	} else {
-	    printf("  | %s%-30s%s %10d %10d %10d  | %s%.4f%s  %.4e | %.4e  ", COLOR_BOLDCYAN, name, COLOR_RESET, rows, columns, nnz, COLOR_BOLDYELLOW, 0.0, COLOR_RESET, 0.0, 0.0);
+	    printf("  | %s%-30s%s %10d %10d %10d  | %s%.4f%s  %.4e  %8ld | %.4e  ", COLOR_BOLDCYAN, name, COLOR_RESET, rows, columns, nnz, 
+			                                                             COLOR_BOLDYELLOW, 0.0, COLOR_RESET, 0.0, necessary_mem, 0.0);
 	    printf("  %s---%s  |\n", COLOR_BOLDRED, COLOR_RESET);	
+	    fprintf(outfd, "%s;%s;%d;%d;%d;%.5e;%.5e\n", argv[1], name, rows, columns, nnz, 0.0, 0.0);
 	}
     
     }
 
-    printf("  +============================================================================================================+\n");
+    printf("  +======================================================================================================================+\n");
     printf("\n\n");
     fclose(infd);
     fclose(outfd);

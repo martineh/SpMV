@@ -1,22 +1,19 @@
 #include "spmv.h"
 #include <sys/prctl.h>
 
-
 void mult_csr_base(struct csr *csr, double *x, double *y)
 {
     for (int k = 0; k < csr->rows; k++) {
         double s = 0.0;
-        int *j = csr->j + csr->i[k];
-        double *A = csr->A + csr->i[k];
         for (int l = csr->i[k]; l < csr->i[k + 1]; l++) {
-            s += x[*j++] * *A++;
+            s += x[csr->j[l]] * csr->A[l];
         }
         y[k] = s;
     }
 }
 
 
-#ifdef SVE
+#if defined(SVE_128) | defined(SVE_256)
 
 #include <arm_sve.h>
 
@@ -120,6 +117,7 @@ struct csr *create_csr(int rows, int columns, int nnz, int alignment, struct mtx
         }
         csr->i[k + 1] = p;
     }
+
 
     return csr;
 }

@@ -237,13 +237,9 @@ void mult_sellp(struct sellp *sellp, double *x, double *y) {
 void mult_sellp(struct sellp *sellp, double *x, double *y) {
     const svbool_t pg = svptrue_b64();
     const svfloat64_t zeros = svdup_n_f64(0);
-    svfloat64_t va, vx, vprod;
-    svint64_t vidx;
-    size_t vl;
     for (int b = 0; b < sellp->num_blocks; b++) {
         svfloat64_t sum = zeros;
         for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b + 1]; l += _BLOCK) {
-
             svfloat64_t val        = svld1(pg, &sellp->A[l]);
             svint64_t col          = svld1sw_s64(pg, &sellp->j[l]);
             svfloat64_t b_vals_vec = svld1_gather_index(pg, x, col);
