@@ -12,8 +12,54 @@ void mult_csr_base(struct csr *csr, double *x, double *y)
     }
 }
 
+#if defined(RVV1_M2_256)
 
-#if defined(NEON)
+#include <riscv_vector.h>
+
+void mult_csr(struct csr *csr, double *x, double *y) {
+
+  size_t nrows = csr->rows;
+  uint32_t *row_ptrs = (uint32_t *)csr->i;
+  uint32_t *col_idx  = (uint32_t *)csr->j;
+  double *vals = csr->A;
+  
+  vuint32m1_t  v_idx;
+
+  vfloat64m2_t vx,vprod,vval;
+  vfloat64m1_t vsum;
+
+  for (size_t i = 0; i < nrows; ++i) {
+    uint32_t start = row_ptrs[i];
+    uint32_t end  = row_ptrs[i + 1];
+
+    uint32_t j = start;
+
+    vprod  = __riscv_vfmv_v_f_f64m2(0.0, 8);
+    vsum   = __riscv_vfmv_v_f_f64m1(0.0, 1);
+
+    while (j < end) {
+      int32_t vl = __riscv_vsetvl_e64m2(end - j);
+
+      vval = __riscv_vle64_v_f64m2(&vals[j], vl);
+
+      v_idx = __riscv_vle32_v_u32m1(&col_idx[j], vl);
+      v_idx = __riscv_vsll_vx_u32m1(v_idx, 3, vl);
+      vx = __riscv_vloxei32_v_f64m2(x, v_idx, vl);
+
+      vprod = __riscv_vfmacc_vv_f64m2(vprod, vval, vx, vl);
+
+      j += vl;
+    }
+
+    int32_t vlr = __riscv_vsetvl_e64m2(nrows);
+    vsum = __riscv_vfredusum_vs_f64m2_f64m1(vprod, vsum, vlr);
+    y[i] = __riscv_vfmv_f_s_f64m1_f64(vsum);
+  }
+
+}
+
+
+#elif defined(NEON)
 
 #include <arm_neon.h>
 

@@ -3,18 +3,20 @@ include Makefile.inc
 CC = g++
 
 ifeq ($(SIMD), AVX2)
-	CFLAGS=-DAVX2 -mavx2 -mfma
+	CFLAGS=-mavx2 -mfma
 else ifeq ($(SIMD), NEON)
-	CFLAGS=-DNEON -march=armv8-a
+	CFLAGS=-march=armv8-a
+else ifeq ($(SIMD), RVV1_M2_256)
+	CFLAGS=-march=rv64gcv_zfh
 else ifeq ($(SIMD), SVE_128)
-	CFLAGS=-DSVE_128 -march=armv8-a+sve
+	CFLAGS=-march=armv8-a+sve
 else ifeq ($(SIMD), SVE_256)
-	CFLAGS=-DSVE_256 -march=armv8-a+sve2
+	CFLAGS=-march=armv8-a+sve2
 else
 	$(error ERROR: Type of arch='$(SIMD) unsuported.)
 endif
 
-CFLAGS += -Wall -O3 -fopenmp
+CFLAGS += -Wall -O3 -fopenmp -D$(SIMD)
 LDFLAGS = -lm -fopenmp
 
 TARGET  = build/spmv
