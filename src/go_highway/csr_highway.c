@@ -47,21 +47,17 @@ void mult_csr_highway(struct csr *csr, double *x, double *y) {
         }
 
         auto prod_v = hn::Zero(d);
-        //double suma_escalar = 0.0;
-        int j = 0;
-        int nElements;
+        
+        
         // BUCLE PRINCIPAL
-        for (j = 0; j < elements; ) {
+        for (int j = 0; j < elements; ) {
             int restantes = elements - j;
-
-            if (restantes >= (int)LANES) {nElements = LANES; }
-            else {nElements = restantes; }
                 // Cargar valores de la matriz
-                const auto a_vals = hn::LoadN(d, values + start_index + j, nElements);
+                const auto a_vals = hn::LoadN(d, values + start_index + j, restantes);
                 
                 // Cargar índices de columna (32-bit)
                 auto v_idx_32 = hn::LoadN(di32, 
-                    reinterpret_cast<const int32_t*>(col_indices + start_index + j), nElements);
+                    reinterpret_cast<const int32_t*>(col_indices + start_index + j), restantes);
                 
                 // Promover a 64-bit para gather
                 auto v_idx_64 = hn::PromoteTo(di64, v_idx_32);
