@@ -11,6 +11,9 @@
 #elif SVE_256
   #define _BLOCK 4
   #define ALIGN_BYTES 128
+#elif NEON
+  #define _BLOCK 2
+  #define ALIGN_BYTES 32
 #elif AVX2
   #define _BLOCK 4
   #define ALIGN_BYTES 32

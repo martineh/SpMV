@@ -13,7 +13,29 @@ void mult_csr_base(struct csr *csr, double *x, double *y)
 }
 
 
-#if defined(SVE_128) | defined(SVE_256)
+#if defined(NEON)
+
+#include <arm_neon.h>
+
+void mult_csr(struct csr *csr, double *x, double *y)
+{
+    int k;
+    for (int row = 0; row < csr->rows; ++row) {
+        float64x2_t sum = vdupq_n_f64(0.0f);
+        for (k = csr->i[row]; k < csr->i[row + 1] - 1; k+=2) {
+            float64x2_t val        = vld1q_f64(&csr->A[k]);
+	    //Manual gather
+            float64x2_t b_vals_vec = {x[csr->j[k]], x[csr->j[k+1]]};
+            sum                    = vfmaq_f64(sum, val, b_vals_vec);
+        }
+        y[row] = sum[0] + sum[1];
+        if (k < csr->i[row + 1]) {
+	  y[row] += csr->A[k] * x[csr->j[k]];
+	}
+    }
+}
+
+#elif defined(SVE_128) | defined(SVE_256)
 
 #include <arm_sve.h>
 

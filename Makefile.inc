@@ -10,7 +10,7 @@
 #      [*] SVE_256
 #
 #-------------------------------------------------------------
-SIMD=SVE_128
+SIMD=NEON
 #-------------------------------------------------------------
 
 
@@ -22,6 +22,6 @@ SIMD=SVE_128
 #   [*] Disable: Leave the variable blank.
 #                GO_HIGHWAY_HOME=                
 #-------------------------------------------------------------
- GO_HIGHWAY_HOME=/home/martineh/software/highway/
-# GO_HIGHWAY_HOME=
+# GO_HIGHWAY_HOME=/home/martineh/software/highway/
+  GO_HIGHWAY_HOME=
 #-------------------------------------------------------------

@@ -9,8 +9,11 @@
 #include "spmv.h"
 #include "sellp.h"
 #include "acsr.h"
-#include "go_highway/csr_highway.h"
 #include "colors.h"
+
+#ifdef GO_HIGHWAY
+#include "go_highway/csr_highway.h"
+#endif
 
 #define MAX_PATH_LEN 1024
 
@@ -189,8 +192,13 @@ int main(int argc, char *argv[])
                 matrix = create_csr(rows, columns, nnz, 1, coo);
                 mult = (void (*)(void *, double *, double *))mult_csr_base;
             } else if (strcmp(argv[1], "csr_highway") == 0) {
+                #ifdef GO_HIGHWAY
                 matrix = create_csr(rows, columns, nnz, _BLOCK, coo);
                 mult = (void (*)(void *, double *, double *))mult_csr_highway;
+                #else
+		printf("ERROR: Compiled without suppor for Google Highway.\n");
+		exit(-1);
+                #endif
             } else if (strcmp(argv[1], "sellp_vec") == 0) {
                 struct csr * mat_csr = create_csr(rows, columns, nnz, 1, coo);
                 matrix = create_sellp(rows, columns, nnz, mat_csr->i, mat_csr->j, mat_csr->A);

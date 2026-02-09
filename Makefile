@@ -4,6 +4,8 @@ CC = g++
 
 ifeq ($(SIMD), AVX2)
 	CFLAGS=-DAVX2 -mavx2 -mfma
+else ifeq ($(SIMD), NEON)
+	CFLAGS=-DNEON -march=armv8-a
 else ifeq ($(SIMD), SVE_128)
 	CFLAGS=-DSVE_128 -march=armv8-a+sve
 else ifeq ($(SIMD), SVE_256)
@@ -26,7 +28,7 @@ ifneq ("$(GO_HIGHWAY_HOME)", "")
     NEW_SRCS := $(wildcard $(SRC_DIR)/go_highway/*.c)
     SRCS     += $(NEW_SRCS)
     OBJS     += $(NEW_SRCS:$(SRC_DIR)/go_highway/%.c=$(OBJ_DIR)/%.o)
-    CFLAGS   += -I$(GO_HIGHWAY_HOME)
+    CFLAGS   += -I$(GO_HIGHWAY_HOME) -DGO_HIGHWAY
     LDFLAGS  += -L$(GO_HIGHWAY_HOME)/build -lhwy
 endif
 

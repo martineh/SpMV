@@ -8,7 +8,25 @@
     
 struct mtx_coo {int i; int j; double a;};
 
-#if defined(SVE_128) || defined(SVE_256)
+#if defined(NEON)
+
+#include <arm_neon.h>
+
+void mult_sellp(struct sellp *sellp, double *x, double *y) {
+    for (int b = 0; b < sellp->num_blocks; b++) {
+	int bstart      = sellp->block_ptr[b];
+	int bend        = sellp->block_ptr[b+1];
+        float64x2_t sum = vdupq_n_f64(0.0f);
+        for (int l = bstart; l < bend; l += _BLOCK) {
+            float64x2_t val        = vld1q_f64(&sellp->A[l]);
+            float64x2_t b_vals_vec = {x[sellp->j[l]], x[sellp->j[l+1]]};
+            sum                    = vfmaq_f64(sum, val, b_vals_vec);
+	}
+	vst1q_f64(&y[b * _BLOCK], sum);
+    }
+}
+
+#elif defined(SVE_128) || defined(SVE_256)
 
 #include <arm_sve.h>
 
