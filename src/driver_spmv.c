@@ -210,9 +210,9 @@ int main(int argc, char *argv[])
 	        free_csr(mat_csr);
 		//TODO: Implementation of sellp for Highway! Uncomment the next line with the
 		//      implemented routine.
-                //mult   = (void (*)(void *, double *, double *))mult_sellp; 
-		printf("ERROR: SELLP for Google Highway not implemented\n");
-		exit(-1);
+                mult   = (void (*)(void *, double *, double *))mult_sellp; 
+		//printf("ERROR: SELLP for Google Highway not implemented\n");
+		//exit(-1);
             } else if (strcmp(argv[1], "acsr") == 0) {
                 struct csr * mat_csr = create_csr_pad(rows, columns, nnz, coo);
 	        matrix = create_acsr(rows, columns, nnz, mat_csr->A, mat_csr->j, mat_csr->i);
