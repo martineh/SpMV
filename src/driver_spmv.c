@@ -13,6 +13,7 @@
 
 #ifdef GO_HIGHWAY
 #include "go_highway/csr_highway.h"
+#include "go_highway/sellp_highway.h"
 #endif
 
 #define MAX_PATH_LEN 1024
@@ -210,7 +211,7 @@ int main(int argc, char *argv[])
 	        free_csr(mat_csr);
 		//TODO: Implementation of sellp for Highway! Uncomment the next line with the
 		//      implemented routine.
-                mult   = (void (*)(void *, double *, double *))mult_sellp; 
+                mult   = (void (*)(void *, double *, double *))mult_sellp_highway; 
 		//printf("ERROR: SELLP for Google Highway not implemented\n");
 		//exit(-1);
             } else if (strcmp(argv[1], "acsr") == 0) {

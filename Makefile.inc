@@ -23,5 +23,5 @@ SIMD=RVV1_M2_256
 #                GO_HIGHWAY_HOME=                
 #-------------------------------------------------------------
 # GO_HIGHWAY_HOME=/home/martineh/software/highway/
-  GO_HIGHWAY_HOME=
+  GO_HIGHWAY_HOME=$(HOME)/highway
 #-------------------------------------------------------------

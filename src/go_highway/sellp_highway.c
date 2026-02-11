@@ -43,26 +43,6 @@ struct sellp {
 
 
 void mult_sellp_highway(struct sellp *sellp, double *x, double *y) {
-  /*
-    vfloat64m2_t va, vx, vprod;
-  vuint32m1_t v_idx;
-  uint32_t *col_idx  = (uint32_t *)sellp->j; 
-  size_t vl;
-  vl = __riscv_vsetvl_e64m2(_BLOCK);
-  for (int b = 0; b < sellp->num_blocks; b++) {
-    vprod = __riscv_vfmv_v_f_f64m2(0.0, vl);
-    for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b + 1]; l += _BLOCK) {
-      va    = __riscv_vle64_v_f64m2(&sellp->A[l],  vl);
-
-      v_idx = __riscv_vle32_v_u32m1(&col_idx[l], vl);
-      v_idx = __riscv_vsll_vx_u32m1(v_idx, 3, vl);
-      vx = __riscv_vloxei32_v_f64m2(x, v_idx, vl);
-
-      vprod = __riscv_vfmacc_vv_f64m2(vprod, va, vx, vl);
-    }
-    __riscv_vse64_v_f64m2(&y[b * _BLOCK], vprod, vl);
-  }
- */
    
     using T = double;
     uint32_t *col_idx  = (uint32_t *)sellp->j;  
