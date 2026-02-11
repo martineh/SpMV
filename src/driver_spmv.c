@@ -206,14 +206,15 @@ int main(int argc, char *argv[])
 	        free_csr(mat_csr);
                 mult   = (void (*)(void *, double *, double *))mult_sellp;
             } else if (strcmp(argv[1], "sellp_highway") == 0) {
+                #ifdef GO_HIGHWAY
                 struct csr * mat_csr = create_csr(rows, columns, nnz, 1, coo);
                 matrix = create_sellp(rows, columns, nnz, mat_csr->i, mat_csr->j, mat_csr->A);
 	        free_csr(mat_csr);
-		//TODO: Implementation of sellp for Highway! Uncomment the next line with the
-		//      implemented routine.
                 mult   = (void (*)(void *, double *, double *))mult_sellp_highway; 
-		//printf("ERROR: SELLP for Google Highway not implemented\n");
-		//exit(-1);
+                #else
+		printf("ERROR: SELLP for Google Highway not implemented\n");
+		exit(-1);
+		#endif
             } else if (strcmp(argv[1], "acsr") == 0) {
                 struct csr * mat_csr = create_csr_pad(rows, columns, nnz, coo);
 	        matrix = create_acsr(rows, columns, nnz, mat_csr->A, mat_csr->j, mat_csr->i);
