@@ -3,8 +3,8 @@
 #----------------------------------------------
 # Select the matrix list file name
 #----------------------------------------------
-#LIST=matrix_lists/matrix_list_160.txt
-LIST=matrix_lists/matrix_list_5.txt
+LIST=matrix_lists/matrix_list_160.txt
+#LIST=matrix_lists/matrix_list_5.txt
 #----------------------------------------------
 
 #----------------------------------------------
@@ -17,7 +17,7 @@ LIST=matrix_lists/matrix_list_5.txt
 #    [*] sellp_autovec
 #    [*] sellp_highway
 #----------------------------------------------
-MODE=csr_base
+MODE=sellp_autovec
 #----------------------------------------------
 
 #----------------------------------------------
