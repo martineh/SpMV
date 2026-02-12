@@ -3,7 +3,7 @@ include Makefile.inc
 CC = g++
 
 ifeq ($(SIMD), AVX2)
-	CFLAGS=-mavx2 -mfma
+	CFLAGS=-mavx2 -mfma -march=haswell -maes
 else ifeq ($(SIMD), NEON)
 	CFLAGS=-march=armv8-a
 else ifeq ($(SIMD), RVV1_M2_256)

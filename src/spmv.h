@@ -52,6 +52,7 @@ void free_csr(struct csr *csr);
 void mult_csr(struct csr *csr, double *x, double *y);
 void mult_csr_base(struct csr *csr, double *x, double *y);
 void mult_mv_csr(struct csr *csr, int n, double *x, double *y);
+void mult_csr_autovec(struct csr *csr, double *x, double *y);
 
 struct csr *create_csr_numa(int rows, int columns, int nnz, struct mtx *coo);
 void mult_csr_numa(struct csr *csr, double *x, double *y);

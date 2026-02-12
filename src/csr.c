@@ -12,6 +12,18 @@ void mult_csr_base(struct csr *csr, double *x, double *y)
     }
 }
 
+void mult_csr_autovec(struct csr *csr, double *x, double *y)
+{
+    for (int k = 0; k < csr->rows; k++) {
+        double s = 0.0;
+        #pragma omp simd
+        for (int l = csr->i[k]; l < csr->i[k + 1]; l++) {
+            s += x[csr->j[l]] * csr->A[l];
+        }
+        y[k] = s;
+    }
+}
+
 #if defined(RVV1_M2_256)
 
 #include <riscv_vector.h>
