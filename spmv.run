@@ -11,11 +11,13 @@ LIST=matrix_lists/matrix_list_5.txt
 # Select the matrix format. Avail:
 #    [*] csr_base
 #    [*] csr_vec
+#    [*] csr_autovec
 #    [*] csr_highway
 #    [*] sellp_vec
+#    [*] sellp_autovec
 #    [*] sellp_highway
 #----------------------------------------------
-MODE=sellp_highway
+MODE=csr_base
 #----------------------------------------------
 
 #----------------------------------------------

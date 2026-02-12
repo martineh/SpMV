@@ -192,6 +192,9 @@ int main(int argc, char *argv[])
             } else if (strcmp(argv[1], "csr_base") == 0) {
                 matrix = create_csr(rows, columns, nnz, 1, coo);
                 mult = (void (*)(void *, double *, double *))mult_csr_base;
+            } else if (strcmp(argv[1], "csr_autovec") == 0) {
+                matrix = create_csr(rows, columns, nnz, 1, coo);
+                mult = (void (*)(void *, double *, double *))mult_csr_autovec;
             } else if (strcmp(argv[1], "csr_highway") == 0) {
                 #ifdef GO_HIGHWAY
                 matrix = create_csr(rows, columns, nnz, _BLOCK, coo);
@@ -205,6 +208,11 @@ int main(int argc, char *argv[])
                 matrix = create_sellp(rows, columns, nnz, mat_csr->i, mat_csr->j, mat_csr->A);
 	        free_csr(mat_csr);
                 mult   = (void (*)(void *, double *, double *))mult_sellp;
+            } else if (strcmp(argv[1], "sellp_autovec") == 0) {
+                struct csr * mat_csr = create_csr(rows, columns, nnz, 1, coo);
+                matrix = create_sellp(rows, columns, nnz, mat_csr->i, mat_csr->j, mat_csr->A);
+	        free_csr(mat_csr);
+                mult   = (void (*)(void *, double *, double *))mult_sellp_autovec;
             } else if (strcmp(argv[1], "sellp_highway") == 0) {
                 #ifdef GO_HIGHWAY
                 struct csr * mat_csr = create_csr(rows, columns, nnz, 1, coo);
@@ -248,8 +256,8 @@ int main(int argc, char *argv[])
                 mult = (void (*)(void *, double *, double *))mult_petsc;
             #endif
             } else {
-                printf("Unknown matrix format\n");
-                return 1;
+                printf("Error: Unknown execution mode.\n");
+                exit(-1);
             }
             
             double *x     = SPMV_ALLOC(double, columns);
