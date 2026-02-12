@@ -315,6 +315,9 @@ void mult_sellp(struct sellp *sellp, double *x, double *y) {
     
 }
 
+
+#endif
+
 void mult_sellp_autovec(struct sellp *ell, double *x, double *y)
 {
     int r = ell->rows - ell->num_blocks * _BLOCK; // remainder rows
@@ -337,8 +340,6 @@ void mult_sellp_autovec(struct sellp *ell, double *x, double *y)
         }
     }
 }
-
-#endif
 
 int by_row(const struct mtx_coo *a, const struct mtx_coo *b) {
     if (a->i < b->i) return -1;
