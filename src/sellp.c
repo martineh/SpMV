@@ -315,14 +315,19 @@ void mult_sellp(struct sellp *sellp, double *x, double *y) {
     
 }
 
-/*
-void mult_sellp(struct sellp *ell, double *x, double *y)
+
+#endif
+
+void mult_sellp_autovec(struct sellp *ell, double *x, double *y)
 {
     int r = ell->rows - ell->num_blocks * _BLOCK; // remainder rows
     for (int b = 0; b < ell->num_blocks; b++) {
         double t[_BLOCK];
+        #pragma omp simd
         for (int s = 0; s < _BLOCK; s++) t[s] = 0;
+
         for (int l = ell->block_ptr[b]; l < ell->block_ptr[b + 1]; l += _BLOCK) {
+            #pragma omp simd
             for (int s = 0; s < _BLOCK; s++) {
                 t[s] += x[ell->j[l + s]] * ell->A[l + s];
             }
@@ -330,13 +335,11 @@ void mult_sellp(struct sellp *ell, double *x, double *y)
         if (b == ell->num_blocks - 1 && r > 0) {
             for (int s = 0; s < r; s++) y[b * _BLOCK + s] = t[s];
         } else {
+            #pragma omp simd
             for (int s = 0; s < _BLOCK; s++) y[b * _BLOCK + s] = t[s];
         }
     }
 }
-*/
-
-#endif
 
 int by_row(const struct mtx_coo *a, const struct mtx_coo *b) {
     if (a->i < b->i) return -1;

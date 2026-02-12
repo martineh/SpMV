@@ -1,5 +1,5 @@
-/mnt/sparseUSB/sparse_matrix/MM/AMD//G2_circuit/G2_circuit.mtx
-/mnt/sparseUSB/sparse_matrix/MM/AMD//G3_circuit/G3_circuit.mtx
-/mnt/sparseUSB/sparse_matrix/MM/Oberwolfach/boneS10/boneS10.mtx
-/mnt/sparseUSB/sparse_matrix/MM/ATandT/twotone/twotone.mtx
-/mnt/sparseUSB/sparse_matrix/MM/BenElechi/BenElechi1/BenElechi1.mtx
+/home/hmartinez/workspace/symetric_mtx/matrix/G2_circuit.mtx
+/home/hmartinez/workspace/symetric_mtx/matrix/G3_circuit.mtx
+/home/hmartinez/workspace/symetric_mtx/matrix/boneS10.mtx
+/home/hmartinez/workspace/symetric_mtx/matrix/twotone.mtx
+/home/hmartinez/workspace/symetric_mtx/matrix/BenElechi1.mtx

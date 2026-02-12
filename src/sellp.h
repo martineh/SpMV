@@ -14,5 +14,6 @@ struct sellp {
 
 struct sellp *create_sellp(int rows, int columns, int nnz, const int *row_ptr_csr, const int *col_idx, const double *A_csr);
 void mult_sellp(struct sellp *sellp, double *x, double *y);
+void mult_sellp_autovec(struct sellp *ell, double *x, double *y);
 void free_sellp(struct sellp *sellp);
 
