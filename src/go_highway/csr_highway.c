@@ -37,7 +37,7 @@ void mult_csr_highway(struct csr *csr, double *x, double *y) {
     #endif
 
     const size_t LANES = hn::Lanes(d);
-    //printf("Lanes: %zu\n", LANES);
+
     const hn::Rebind<int32_t, decltype(d)> di32;
     const hn::Rebind<int64_t, decltype(d)> di64;
 
