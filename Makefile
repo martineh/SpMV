@@ -7,7 +7,7 @@ ifeq ($(SIMD), AVX2)
 else ifeq ($(SIMD), NEON)
 	CFLAGS=-march=armv8-a
 else ifeq ($(SIMD), RVV1_M2_256)
-	CFLAGS=-march=rv64gcv_zfh
+	CFLAGS=-march=rv64gcv_zfh 
 else ifeq ($(SIMD), SVE_128)
 	CFLAGS=-march=armv8-a+sve
 else ifeq ($(SIMD), SVE_256)

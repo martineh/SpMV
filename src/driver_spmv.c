@@ -319,11 +319,16 @@ int main(int argc, char *argv[])
             SPMV_FREE(y); 
             SPMV_FREE(y_ref);
    	    free(coo);
-    
-            if      (strcmp(argv[1], "coo") == 0)      free_coo((struct coo *)matrix);
-            else if (strcmp(argv[1], "csr") == 0)      free_csr((struct csr *)matrix);
-            else if (strcmp(argv[1], "csr_base") == 0) free_csr((struct csr *)matrix);
-            else if (strcmp(argv[1], "sellp") == 0)    free_sellp((struct sellp *)matrix);
+
+
+            if      (strcmp(argv[1], "coo")           == 0)  free_coo((struct coo *)matrix);
+            else if (strcmp(argv[1], "csr_vec")       == 0)  free_csr((struct csr *)matrix);
+            else if (strcmp(argv[1], "csr_autovec")   == 0)  free_csr((struct csr *)matrix);
+            else if (strcmp(argv[1], "csr_highway")   == 0)  free_csr((struct csr *)matrix);
+            else if (strcmp(argv[1], "sellp_vec")     == 0)  free_sellp((struct sellp *)matrix);
+            else if (strcmp(argv[1], "sellp_autovec") == 0)  free_sellp((struct sellp *)matrix);
+            else if (strcmp(argv[1], "sellp_highway") == 0)  free_sellp((struct sellp *)matrix);
+            else if (strcmp(argv[1], "csr_base") == 0)       free_csr((struct csr *)matrix);
 	} else {
 	    printf("  | %s%-30s%s %10d %10d %10d  | %s%.4f%s  %.4e  %8ld | %.4e  ", COLOR_BOLDCYAN, name, COLOR_RESET, rows, columns, nnz, 
 			                                                             COLOR_BOLDYELLOW, 0.0, COLOR_RESET, 0.0, necessary_mem, 0.0);

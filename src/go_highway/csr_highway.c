@@ -30,8 +30,14 @@ void mult_csr_highway(struct csr *csr, double *x, double *y) {
     uint32_t *col_indices = csr->j;
     double *values = csr->A;
 
+    #ifdef RVV1_M2_256
+    const hn::ScalableTag<T, 1> d;
+    #else
     const hn::ScalableTag<T> d;
+    #endif
+
     const size_t LANES = hn::Lanes(d);
+
     const hn::Rebind<int32_t, decltype(d)> di32;
     const hn::Rebind<int64_t, decltype(d)> di64;
 

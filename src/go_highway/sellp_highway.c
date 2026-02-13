@@ -27,7 +27,13 @@ void mult_sellp_highway(struct sellp *sellp, double *x, double *y) {
    
     using T = double;
     uint32_t *col_idx  = (uint32_t *)sellp->j;  
+
+    #ifdef RVV1_M2_256
+    const hn::ScalableTag<T, 1> d;
+    #else
     const hn::ScalableTag<T> d;
+    #endif
+    
     //const size_t LANES = hn::Lanes(d);
     
     const hn::Rebind<int32_t, decltype(d)> di32;
