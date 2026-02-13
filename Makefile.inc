@@ -10,7 +10,7 @@
 #      [*] SVE_256
 #
 #-------------------------------------------------------------
-SIMD=AVX2
+SIMD=RVV1_M2_256
 #-------------------------------------------------------------
 
 
@@ -22,6 +22,6 @@ SIMD=AVX2
 #   [*] Disable: Leave the variable blank.
 #                GO_HIGHWAY_HOME=                
 #-------------------------------------------------------------
-  GO_HIGHWAY_HOME=/home/hmartinez/software/highway
+  GO_HIGHWAY_HOME=/home/martineh/Software/highway
 # GO_HIGHWAY_HOME=
 #-------------------------------------------------------------
