@@ -1,5 +1,5 @@
-/home/hmartinez/workspace/symetric_mtx/matrix/G2_circuit.mtx
-/home/hmartinez/workspace/symetric_mtx/matrix/G3_circuit.mtx
-/home/hmartinez/workspace/symetric_mtx/matrix/boneS10.mtx
-/home/hmartinez/workspace/symetric_mtx/matrix/twotone.mtx
-/home/hmartinez/workspace/symetric_mtx/matrix/BenElechi1.mtx
+/mnt/sparseUSB/sparse_matrix/BenElechi1/BenElechi1.mtx
+/mnt/sparseUSB/sparse_matrix/CurlCurl_1/CurlCurl_1.mtx
+/mnt/sparseUSB/sparse_matrix/CurlCurl_2/CurlCurl_2.mtx
+/mnt/sparseUSB/sparse_matrix/CurlCurl_3/CurlCurl_3.mtx
+/mnt/sparseUSB/sparse_matrix/CurlCurl_4/CurlCurl_4.mtx
