@@ -1,267 +1,143 @@
-	.arch armv8-a
 	.file	"csr_highway.c"
-// GNU C++14 (Ubuntu/Linaro 7.5.0-3ubuntu1~18.04) version 7.5.0 (aarch64-linux-gnu)
-//	compiled by GNU C version 7.5.0, GMP version 6.1.2, MPFR version 4.0.1, MPC version 1.1.0, isl version isl-0.19-GMP
+	.option nopic
+	.attribute arch, "rv64i2p1_m2p0_a2p1_f2p2_d2p2_c2p0_v1p0_zicsr2p0_zifencei2p0_zfh1p0_zfhmin1p0_zve32f1p0_zve32x1p0_zve64d1p0_zve64f1p0_zve64x1p0_zvl128b1p0_zvl32b1p0_zvl64b1p0"
+	.attribute unaligned_access, 1
+	.attribute stack_align, 16
+# GNU C++17 (Bianbu 13.2.0-23ubuntu4bb3) version 13.2.0 (riscv64-linux-gnu)
+#	compiled by GNU C version 13.2.0, GMP version 6.3.0, MPFR version 4.2.1, MPC version 1.3.1, isl version isl-0.26-GMP
 
-// GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
-// options passed:  -I /nfs/gap/psiwins/highway-xav/highway/
-// -imultiarch aarch64-linux-gnu -D_GNU_SOURCE -D_REENTRANT -D NEON
-// -D GO_HIGHWAY -D GO_HIGHWAY src/go_highway/csr_highway.c -march=armv8-a
-// -mlittle-endian -mabi=lp64 -auxbase-strip csr_highway.s -O3 -Wall
-// -fopenmp -fverbose-asm -fstack-protector-strong -Wformat-security
-// options enabled:  -fPIC -fPIE -faggressive-loop-optimizations
-// -falign-labels -fauto-inc-dec -fbranch-count-reg -fcaller-saves
-// -fchkp-check-incomplete-type -fchkp-check-read -fchkp-check-write
-// -fchkp-instrument-calls -fchkp-narrow-bounds -fchkp-optimize
-// -fchkp-store-bounds -fchkp-use-static-bounds
-// -fchkp-use-static-const-bounds -fchkp-use-wrappers -fcode-hoisting
-// -fcombine-stack-adjustments -fcommon -fcompare-elim -fcprop-registers
-// -fcrossjumping -fcse-follow-jumps -fdefer-pop
-// -fdelete-null-pointer-checks -fdevirtualize -fdevirtualize-speculatively
-// -fdwarf2-cfi-asm -fearly-inlining -feliminate-unused-debug-types
-// -fexceptions -fexpensive-optimizations -fforward-propagate
-// -ffp-int-builtin-inexact -ffunction-cse -fgcse -fgcse-after-reload
-// -fgcse-lm -fgnu-runtime -fgnu-unique -fguess-branch-probability
-// -fhoist-adjacent-loads -fident -fif-conversion -fif-conversion2
-// -findirect-inlining -finline -finline-atomics -finline-functions
-// -finline-functions-called-once -finline-small-functions -fipa-bit-cp
-// -fipa-cp -fipa-cp-clone -fipa-icf -fipa-icf-functions
-// -fipa-icf-variables -fipa-profile -fipa-pure-const -fipa-ra
-// -fipa-reference -fipa-sra -fipa-vrp -fira-hoist-pressure
-// -fira-share-save-slots -fira-share-spill-slots
-// -fisolate-erroneous-paths-dereference -fivopts -fkeep-static-consts
-// -fleading-underscore -flifetime-dse -flra-remat -flto-odr-type-merging
-// -fmath-errno -fmerge-constants -fmerge-debug-strings
-// -fmove-loop-invariants -fomit-frame-pointer -foptimize-sibling-calls
-// -foptimize-strlen -fpartial-inlining -fpeel-loops -fpeephole -fpeephole2
-// -fplt -fpredictive-commoning -fprefetch-loop-arrays -free
-// -freg-struct-return -freorder-blocks -freorder-functions
-// -frerun-cse-after-loop -fsched-critical-path-heuristic
-// -fsched-dep-count-heuristic -fsched-group-heuristic -fsched-interblock
-// -fsched-last-insn-heuristic -fsched-pressure -fsched-rank-heuristic
-// -fsched-spec -fsched-spec-insn-heuristic -fsched-stalled-insns-dep
-// -fschedule-fusion -fschedule-insns -fschedule-insns2 -fsection-anchors
-// -fsemantic-interposition -fshow-column -fshrink-wrap
-// -fshrink-wrap-separate -fsigned-zeros -fsplit-ivs-in-unroller
-// -fsplit-loops -fsplit-paths -fsplit-wide-types -fssa-backprop
-// -fssa-phiopt -fstack-protector-strong -fstdarg-opt -fstore-merging
-// -fstrict-aliasing -fstrict-overflow -fstrict-volatile-bitfields
-// -fsync-libcalls -fthread-jumps -ftoplevel-reorder -ftrapping-math
-// -ftree-bit-ccp -ftree-builtin-call-dce -ftree-ccp -ftree-ch
-// -ftree-coalesce-vars -ftree-copy-prop -ftree-cselim -ftree-dce
-// -ftree-dominator-opts -ftree-dse -ftree-forwprop -ftree-fre
-// -ftree-loop-distribute-patterns -ftree-loop-if-convert -ftree-loop-im
-// -ftree-loop-ivcanon -ftree-loop-optimize -ftree-loop-vectorize
-// -ftree-parallelize-loops= -ftree-partial-pre -ftree-phiprop -ftree-pre
-// -ftree-pta -ftree-reassoc -ftree-scev-cprop -ftree-sink
-// -ftree-slp-vectorize -ftree-slsr -ftree-sra -ftree-switch-conversion
-// -ftree-tail-merge -ftree-ter -ftree-vrp -funit-at-a-time
-// -funswitch-loops -fverbose-asm -fzero-initialized-in-bss
-// -mfix-cortex-a53-835769 -mfix-cortex-a53-843419 -mglibc -mlittle-endian
-// -momit-leaf-frame-pointer -mpc-relative-literal-loads
-
+# GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+# options passed: -mtune=spacemit-x60 -mabi=lp64d -misa-spec=20191213 -march=rv64imafdcv_zicsr_zifencei_zfh_zfhmin_zve32f_zve32x_zve64d_zve64f_zve64x_zvl128b_zvl32b_zvl64b -O3 -fopenmp -fstack-protector-strong
 	.text
-	.align	2
-	.p2align 3,,7
-	.global	mult_csr_highway
-	.type	mult_csr_highway, %function
+#APP
+	.globl _ZSt21ios_base_library_initv
+#NO_APP
+	.align	1
+	.globl	mult_csr_highway
+	.type	mult_csr_highway, @function
 mult_csr_highway:
-.LFB9127:
+.LFB9893:
 	.cfi_startproc
-	stp	x29, x30, [sp, -64]!	//,,,
-	.cfi_def_cfa_offset 64
-	.cfi_offset 29, -64
-	.cfi_offset 30, -56
-	adrp	x12, :got:__stack_chk_guard	// tmp217,
-	add	x29, sp, 0	//,,
-	.cfi_def_cfa_register 29
-// src/go_highway/csr_highway.c:24: void mult_csr_highway(struct csr *csr, double *x, double *y) {
-	ldr	x3, [x12, #:got_lo12:__stack_chk_guard]	// tmp198, tmp217,
-// src/go_highway/csr_highway.c:45:     for (int64_t i = 0; i < nrows; i++) {
-	ldrsw	x11, [x0]	// _53, csr_26(D)->rows
-// src/go_highway/csr_highway.c:24: void mult_csr_highway(struct csr *csr, double *x, double *y) {
-	ldr	x4, [x3]	// tmp228, __stack_chk_guard
-	str	x4, [x29, 56]	// tmp228, D.123031
-	mov	x4,0	// tmp228
-// src/go_highway/csr_highway.c:32:     double *values = csr->A;
-	ldr	x14, [x0, 40]	// values, csr_26(D)->A
-// src/go_highway/csr_highway.c:45:     for (int64_t i = 0; i < nrows; i++) {
-	cmp	x11, 0	// _53,
-// src/go_highway/csr_highway.c:31:     int64_t *col_indices = csr->j;
-	ldp	x6, x13, [x0, 24]	// row_indices, col_indices, csr_26(D)->i
-// src/go_highway/csr_highway.c:45:     for (int64_t i = 0; i < nrows; i++) {
-	ble	.L1	//,
-// src/go_highway/csr_highway.c:59:         for (int64_t j = 0; j < elements; ) {
-	movi	d4, #0	// _116
-// src/go_highway/csr_highway.c:45:     for (int64_t i = 0; i < nrows; i++) {
-	mov	x8, 0	// i,
-// /usr/lib/gcc/aarch64-linux-gnu/7/include/arm_neon.h:6493:   return __builtin_aarch64_combinedi (__a[0], __b[0]);
-	mov	x15, 0	// tmp223,
-	b	.L11	//
-	.p2align 2
-.L20:
-// src/go_highway/csr_highway.c:51:             y[i] = 0.0;  
-	str	xzr, [x2, x8, lsl 3]	//, MEM[base: y_42(D), index: _106, step: 8, offset: 0B]
-// src/go_highway/csr_highway.c:45:     for (int64_t i = 0; i < nrows; i++) {
-	add	x8, x8, 1	// i, i,
-	add	x6, x6, 8	// ivtmp.199, ivtmp.199,
-	cmp	x8, x11	// i, _53
-	beq	.L1	//,
-.L11:
-// src/go_highway/csr_highway.c:48:         int64_t elements = end_index - start_index;
-	ldp	x3, x0, [x6]	// start_index, MEM[base: _1, offset: 8B], MEM[base: _1, offset: 0B]
-	sub	x0, x0, x3	// elements, MEM[base: _1, offset: 8B], start_index
-// src/go_highway/csr_highway.c:50:         if (elements == 0) {
-	cmp	x0, 0	// elements,
-	beq	.L20	//,
-// src/go_highway/csr_highway.c:59:         for (int64_t j = 0; j < elements; ) {
-	ble	.L13	//,
-	sub	x4, x0, #1	// tmp202, ivtmp.189,
-	lsl	x3, x3, 3	// _109, start_index,
-	sub	x7, x0, #2	// tmp201, ivtmp.189,
-	and	x4, x4, -2	// tmp203, tmp202,
-	add	x5, x13, x3	// ivtmp.190, col_indices, _109
-	sub	x7, x7, x4	// _51, tmp201, tmp203
-// src/go_highway/csr_highway.c:55:         auto prod_v = hn::Zero(d);
-	movi	v1.2d, 0	// prod_v$raw
-	add	x3, x14, x3	// ivtmp.191, values, _109
-	add	x10, x29, 16	// tmp218,,
-	add	x9, x29, 32	// tmp219,,
-	b	.L10	//
-	.p2align 2
-.L22:
-// /usr/lib/gcc/aarch64-linux-gnu/7/include/arm_neon.h:17168:   return __builtin_aarch64_ld1v2df ((const __builtin_aarch64_simd_df *) a);
-	ldr	q2, [x3]	// SR.169,* ivtmp.191
-// /usr/lib/gcc/aarch64-linux-gnu/7/include/arm_neon.h:17220:   return __builtin_aarch64_ld1v2di ((const __builtin_aarch64_simd_di *) a);
-	ldr	q0, [x5]	// SR.171,* ivtmp.190
-.L8:
-// /usr/lib/gcc/aarch64-linux-gnu/7/include/arm_neon.h:26929:   __builtin_aarch64_st1v2di ((__builtin_aarch64_simd_di *) a, b);
-	str	q0, [x10]	// SR.171,
-// /nfs/gap/psiwins/highway-xav/highway/hwy/ops/generic_ops-inl.h:1536:     lanes[i] = base[index_lanes[i]];
-	fmov	x16, d0	// tmp230, SR.171
-	ldr	x4, [x29, 24]	// index_lanes, index_lanes
-	sub	x0, x0, #2	// ivtmp.189, ivtmp.189,
-	add	x5, x5, 16	// ivtmp.190, ivtmp.190,
-	add	x3, x3, 16	// ivtmp.191, ivtmp.191,
-// src/go_highway/csr_highway.c:59:         for (int64_t j = 0; j < elements; ) {
-	cmp	x0, x7	// ivtmp.189, _51
-// /nfs/gap/psiwins/highway-xav/highway/hwy/ops/generic_ops-inl.h:1536:     lanes[i] = base[index_lanes[i]];
-	ldr	d3, [x1, x16, lsl 3]	// *_79, *_79
-	ldr	d0, [x1, x4, lsl 3]	// *_88, *_88
-	stp	d3, d0, [x29, 32]	// *_79, *_88, lanes
-// /usr/lib/gcc/aarch64-linux-gnu/7/include/arm_neon.h:17168:   return __builtin_aarch64_ld1v2df ((const __builtin_aarch64_simd_df *) a);
-	ldr	q0, [x9]	// _57,
-// /usr/lib/gcc/aarch64-linux-gnu/7/include/arm_neon.h:16724:   return __builtin_aarch64_fmav2df (__b, __c, __a);
-	fmla	v1.2d, v2.2d, v0.2d	// prod_v$raw, SR.169, _57
-// src/go_highway/csr_highway.c:59:         for (int64_t j = 0; j < elements; ) {
-	beq	.L21	//,
-.L10:
-// /nfs/gap/psiwins/highway-xav/highway/hwy/ops/generic_ops-inl.h:1116:   if (max_lanes_to_load >= 2) {
-	cmp	x0, 1	// ivtmp.189,
-	bgt	.L22	//,
-// /nfs/gap/psiwins/highway-xav/highway/hwy/ops/generic_ops-inl.h:1121:                : Zero(d);
-	movi	v2.2d, 0	// SR.169
-	movi	v0.4s, 0	// SR.171
-	bne	.L8	//,
-// /usr/lib/gcc/aarch64-linux-gnu/7/include/arm_neon.h:6545:   return __builtin_aarch64_combinedf (__a[0], __b[0]);
-	ldr	d2, [x3]	// MEM[base: _14, offset: 0B], MEM[base: _14, offset: 0B]
-// /usr/lib/gcc/aarch64-linux-gnu/7/include/arm_neon.h:6493:   return __builtin_aarch64_combinedi (__a[0], __b[0]);
-	ldr	x4, [x5]	// MEM[base: _16, offset: 0B], MEM[base: _16, offset: 0B]
-	fmov	d0, x4	// SR.171, MEM[base: _16, offset: 0B]
-// /usr/lib/gcc/aarch64-linux-gnu/7/include/arm_neon.h:6545:   return __builtin_aarch64_combinedf (__a[0], __b[0]);
-	dup	d2, v2.d[0]	// SR.169, MEM[base: _14, offset: 0B]
-// /usr/lib/gcc/aarch64-linux-gnu/7/include/arm_neon.h:6493:   return __builtin_aarch64_combinedi (__a[0], __b[0]);
-	ins	v0.d[1], x15	// SR.171, tmp223
-// /usr/lib/gcc/aarch64-linux-gnu/7/include/arm_neon.h:6545:   return __builtin_aarch64_combinedf (__a[0], __b[0]);
-	ins	v2.d[1], v4.d[0]	// SR.169, _116
-	b	.L8	//
-	.p2align 2
-.L21:
-	faddp	d1, v1.2d	// _116, prod_v$raw
-// src/go_highway/csr_highway.c:79:         y[i] = hn::ReduceSum(d, prod_v) ;
-	str	d1, [x2, x8, lsl 3]	// _116, MEM[base: y_42(D), index: _107, step: 8, offset: 0B]
-.L24:
-// src/go_highway/csr_highway.c:45:     for (int64_t i = 0; i < nrows; i++) {
-	add	x8, x8, 1	// i, i,
-	add	x6, x6, 8	// ivtmp.199, ivtmp.199,
-	cmp	x8, x11	// i, _53
-	bne	.L11	//,
-.L1:
-// src/go_highway/csr_highway.c:81:   }
-	ldr	x12, [x12, #:got_lo12:__stack_chk_guard]	// tmp214, tmp217,
-	ldr	x1, [x29, 56]	// tmp229, D.123031
-	ldr	x0, [x12]	// tmp216, __stack_chk_guard
-	eor	x0, x1, x0	// tmp216, tmp229
-	cbnz	x0, .L23	// tmp216,
-	ldp	x29, x30, [sp], 64	//,,,
-	.cfi_remember_state
-	.cfi_restore 30
-	.cfi_restore 29
-	.cfi_def_cfa 31, 0
-	ret
-	.p2align 2
-.L13:
-	.cfi_restore_state
-// src/go_highway/csr_highway.c:59:         for (int64_t j = 0; j < elements; ) {
-	movi	d1, #0	// _116
-// src/go_highway/csr_highway.c:79:         y[i] = hn::ReduceSum(d, prod_v) ;
-	str	d1, [x2, x8, lsl 3]	// _116, MEM[base: y_42(D), index: _107, step: 8, offset: 0B]
-	b	.L24	//
-.L23:
-// src/go_highway/csr_highway.c:81:   }
-	bl	__stack_chk_fail	//
-	.cfi_endproc
-.LFE9127:
-	.size	mult_csr_highway, .-mult_csr_highway
-	.section	.text.startup,"ax",@progbits
-	.align	2
-	.p2align 3,,7
-	.type	_GLOBAL__sub_I_mult_csr_highway, %function
-_GLOBAL__sub_I_mult_csr_highway:
-.LFB10726:
-	.cfi_startproc
-	stp	x29, x30, [sp, -32]!	//,,,
+# src/go_highway/csr_highway.c:27:     int nrows = csr->rows;
+	lw	t4,0(a0)		# nrows, csr_25(D)->rows
+# src/go_highway/csr_highway.c:24: void mult_csr_highway(struct csr *csr, double *x, double *y) {
+	addi	sp,sp,-32	#,,
 	.cfi_def_cfa_offset 32
-	.cfi_offset 29, -32
-	.cfi_offset 30, -24
-	add	x29, sp, 0	//,,
-	.cfi_def_cfa_register 29
-	str	x19, [sp, 16]	//,
-	.cfi_offset 19, -16
-// /usr/include/c++/7/iostream:74:   static ios_base::Init __ioinit;
-	adrp	x19, .LANCHOR0	// tmp74,
-	add	x19, x19, :lo12:.LANCHOR0	// tmp73, tmp74,
-	mov	x0, x19	//, tmp73
-	bl	_ZNSt8ios_base4InitC1Ev	//
-	adrp	x0, :got:_ZNSt8ios_base4InitD1Ev	// tmp80,
-	mov	x1, x19	//, tmp73
-// src/go_highway/csr_highway.c:83: } // extern "C"
-	ldr	x19, [sp, 16]	//,
-// /usr/include/c++/7/iostream:74:   static ios_base::Init __ioinit;
-	adrp	x2, __dso_handle	// tmp76,
-	ldr	x0, [x0, #:got_lo12:_ZNSt8ios_base4InitD1Ev]	//, tmp80,
-	add	x2, x2, :lo12:__dso_handle	//, tmp76,
-// src/go_highway/csr_highway.c:83: } // extern "C"
-	ldp	x29, x30, [sp], 32	//,,,
-	.cfi_restore 30
-	.cfi_restore 29
-	.cfi_restore 19
-	.cfi_def_cfa 31, 0
-// /usr/include/c++/7/iostream:74:   static ios_base::Init __ioinit;
-	b	__cxa_atexit	//
+	lui	t0,%hi(__stack_chk_guard)	# tmp194,
+	sd	ra,24(sp)	#,
+	.cfi_offset 1, -8
+# src/go_highway/csr_highway.c:24: void mult_csr_highway(struct csr *csr, double *x, double *y) {
+	ld	a5, %lo(__stack_chk_guard)(t0)	# tmp205, __stack_chk_guard
+	sd	a5, 8(sp)	# tmp205, D.213007
+	li	a5, 0	# tmp205
+# src/go_highway/csr_highway.c:29:     int64_t* row_indices =csr->i;
+	ld	t3,24(a0)		# row_indices, csr_25(D)->i
+# src/go_highway/csr_highway.c:31:     int64_t *col_indices = csr->j;
+	ld	t5,32(a0)		# col_indices, csr_25(D)->j
+# src/go_highway/csr_highway.c:32:     double *values = csr->A;
+	ld	t6,40(a0)		# values, csr_25(D)->A
+# src/go_highway/csr_highway.c:45:     for (int64_t i = 0; i < nrows; i++) {
+	ble	t4,zero,.L1	#, nrows,,
+	vsetvli	a5,zero,e64,m2,ta,mu	#, _41,,,,
+	slli	t4,t4,3	#, tmp189, nrows
+	slli	t1,a5,3	#, _101, _41
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:732: HWY_RVV_FOREACH_UI(HWY_RVV_SET, Set, mv_v_x, _ALL_VIRT)
+	vsetvli	a5,zero,e64,m2,ta,ma	#,,,,,
+	add	t4,t3,t4	# tmp189, _21, ivtmp.96
+	vmv.v.i	v28,0	# _30,
+	vsetvli	a4,zero,e64,m1,ta,ma	#,,,,,
+	vmv.v.i	v8,0	# _81,
+	j	.L7		#
+.L3:
+# src/go_highway/csr_highway.c:51:             y[i] = 0.0;  
+	fsd	fa5,0(a2)	# _86, MEM[(double *)_56]
+# src/go_highway/csr_highway.c:45:     for (int64_t i = 0; i < nrows; i++) {
+	addi	t3,t3,8	#, ivtmp.96, ivtmp.96
+	addi	a2,a2,8	#, ivtmp.97, ivtmp.97
+	beq	t4,t3,.L1	#, _21, ivtmp.96,
+.L7:
+# src/go_highway/csr_highway.c:46:         const int64_t start_index = row_indices[i];
+	ld	a3,0(t3)		# start_index, MEM[(int64_t *)_59]
+	fmv.d.x	fa5,zero	# _86,
+# src/go_highway/csr_highway.c:48:         int64_t elements = end_index - start_index;
+	ld	a4,8(t3)		# MEM[(int64_t *)_59 + 8B], MEM[(int64_t *)_59 + 8B]
+	sub	a7,a4,a3	# elements, MEM[(int64_t *)_59 + 8B], start_index
+# src/go_highway/csr_highway.c:50:         if (elements == 0) {
+	beq	a4,a3,.L3	#, MEM[(int64_t *)_59 + 8B], start_index,
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:936: HWY_RVV_FOREACH_F(HWY_RVV_CAST_IF, _, reinterpret, _ALL)
+	vmv2r.v	v26,v28	# _30, prod_v
+# src/go_highway/csr_highway.c:59:         for (int64_t j = 0; j < elements; ) {
+	ble	a7,zero,.L16	#, elements,,
+	slli	a3,a3,3	#, _95, start_index
+# src/go_highway/csr_highway.c:59:         for (int64_t j = 0; j < elements; ) {
+	li	a0,0		# j,
+	add	a6,t6,a3	# _95, ivtmp.88, values
+	add	a3,t5,a3	# _95, ivtmp.89, col_indices
+.L6:
+# src/go_highway/csr_highway.c:60:             int64_t restantes = elements - j;
+	sub	a4,a7,a0	# _77, elements, j
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:657: HWY_RVV_FOREACH(HWY_RVV_LANES, Lanes, setvlmax_e, _ALL)
+	bleu	a4,a5,.L5	#, _77, _41,
+	mv	a4,a5	# _77, _41
+.L5:
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:2061: HWY_RVV_FOREACH(HWY_RVV_LOADN, LoadN, le, _ALL_VIRT)
+	vsetvli	zero,a4,e64,m2,tu,ma	# _77,,,,
+	add	a0,a0,a5	# _41, j, j
+	vmv2r.v	v30,v28	# _30, _97
+	vmv2r.v	v24,v28	# _30, _64
+	vle64.v	v30,0(a6)	# _97,* ivtmp.88,
+	vle64.v	v24,0(a3)	# _64,* ivtmp.89,
+# src/go_highway/csr_highway.c:59:         for (int64_t j = 0; j < elements; ) {
+	add	a6,a6,t1	# _101, ivtmp.88, ivtmp.88
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:1255: HWY_RVV_FOREACH_UI(HWY_RVV_SHIFT, ShiftLeft, sll, _ALL)
+	vsetvli	a5,zero,e64,m2,ta,ma	#,,,,,
+# src/go_highway/csr_highway.c:59:         for (int64_t j = 0; j < elements; ) {
+	add	a3,a3,t1	# _101, ivtmp.89, ivtmp.89
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:1255: HWY_RVV_FOREACH_UI(HWY_RVV_SHIFT, ShiftLeft, sll, _ALL)
+	vsll.vi	v24,v24,3	#, _47, _64,
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:2247: HWY_RVV_FOREACH(HWY_RVV_GATHER, GatherOffset, lux, _ALL_VIRT)
+	vluxei64.v	v24,(a1),v24	# _51, x, _47,
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:1571: HWY_RVV_FOREACH_F(HWY_RVV_FMA, MulAdd, fmacc, _ALL)
+	vfmacc.vv	v26,v30,v24	# prod_v, _97, _51,
+# src/go_highway/csr_highway.c:59:         for (int64_t j = 0; j < elements; ) {
+	bgt	a7,a0,.L6	#, elements, j,
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:4800: HWY_RVV_FOREACH_F(HWY_RVV_REDUCE, RedSum, fredusum, _ALL_VIRT)
+	vfredusum.vs	v26,v26,v8	# _85, prod_v, _81,
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:3540: HWY_RVV_FOREACH_F(HWY_RVV_GET_LANE, GetLane, fmv_f, _ALL)
+	vfmv.f.s	fa5,v26	# _86, _85
+.L18:
+# src/go_highway/csr_highway.c:51:             y[i] = 0.0;  
+	fsd	fa5,0(a2)	# _86, MEM[(double *)_56]
+# src/go_highway/csr_highway.c:45:     for (int64_t i = 0; i < nrows; i++) {
+	addi	t3,t3,8	#, ivtmp.96, ivtmp.96
+	addi	a2,a2,8	#, ivtmp.97, ivtmp.97
+	bne	t4,t3,.L7	#, _21, ivtmp.96,
+.L1:
+# src/go_highway/csr_highway.c:81:   }
+	ld	a4, 8(sp)	# tmp206, D.213007
+	ld	a5, %lo(__stack_chk_guard)(t0)	# tmp193, __stack_chk_guard
+	xor	a5, a4, a5	# tmp193, tmp206
+	li	a4, 0	# tmp206
+	bne	a5,zero,.L17	#, tmp193,,
+	ld	ra,24(sp)		#,
+	.cfi_remember_state
+	.cfi_restore 1
+	addi	sp,sp,32	#,,
+	.cfi_def_cfa_offset 0
+	jr	ra		#
+.L16:
+	.cfi_restore_state
+	vsetvli	a5,zero,e64,m2,ta,ma	#,,,,,
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:4800: HWY_RVV_FOREACH_F(HWY_RVV_REDUCE, RedSum, fredusum, _ALL_VIRT)
+	vfredusum.vs	v26,v26,v8	# _85, prod_v, _81,
+# /nfs/gap/psiwins/highway/hwy/ops/rvv-inl.h:3540: HWY_RVV_FOREACH_F(HWY_RVV_GET_LANE, GetLane, fmv_f, _ALL)
+	vfmv.f.s	fa5,v26	# _86, _85
+	j	.L18		#
+.L17:
+# src/go_highway/csr_highway.c:81:   }
+	call	__stack_chk_fail		#
 	.cfi_endproc
-.LFE10726:
-	.size	_GLOBAL__sub_I_mult_csr_highway, .-_GLOBAL__sub_I_mult_csr_highway
-	.section	.init_array,"aw"
-	.align	3
-	.xword	_GLOBAL__sub_I_mult_csr_highway
-	.bss
-	.align	3
-	.set	.LANCHOR0,. + 0
-	.type	_ZStL8__ioinit, %object
-	.size	_ZStL8__ioinit, 1
-_ZStL8__ioinit:
-	.zero	1
-	.hidden	__dso_handle
-	.ident	"GCC: (Ubuntu/Linaro 7.5.0-3ubuntu1~18.04) 7.5.0"
+.LFE9893:
+	.size	mult_csr_highway, .-mult_csr_highway
+	.ident	"GCC: (Bianbu 13.2.0-23ubuntu4bb3) 13.2.0"
 	.section	.note.GNU-stack,"",@progbits

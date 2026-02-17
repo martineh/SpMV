@@ -15,7 +15,7 @@ struct mtx_coo {int i; int j; double a;};
 void mult_sellp(struct sellp *sellp, double *x, double *y)
 {
   vfloat64m2_t va, vx, vprod;
-  vuint64m1_t v_idx;
+  vuint64m2_t v_idx;
   uint64_t *col_idx  = (uint64_t *)sellp->j; 
   size_t vl;
   vl = __riscv_vsetvl_e64m2(_BLOCK);
@@ -24,8 +24,8 @@ void mult_sellp(struct sellp *sellp, double *x, double *y)
     for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b + 1]; l += _BLOCK) {
       va    = __riscv_vle64_v_f64m2(&sellp->A[l],  vl);
 
-      v_idx = __riscv_vle64_v_u64m1(&col_idx[l], vl);
-      v_idx = __riscv_vsll_vx_u64m1(v_idx, 3, vl);
+      v_idx = __riscv_vle64_v_u64m2(&col_idx[l], vl);
+      v_idx = __riscv_vsll_vx_u64m2(v_idx, 3, vl);
       vx = __riscv_vloxei64_v_f64m2(x, v_idx, vl);
 
       vprod = __riscv_vfmacc_vv_f64m2(vprod, va, vx, vl);
@@ -427,7 +427,7 @@ struct sellp *create_sellp(int rows, int columns, int nnz, const int64_t *row_pt
         posix_memalign((void**)&sellp->A, ALIGN_BYTES, sizeof(double) * l_total)) {
         perror("posix_memalign j/A"); exit(1);
     }
-    sellp->memusage += (sizeof(int) + sizeof(double)) * l_total;
+    sellp->memusage += (sizeof(int64_t) + sizeof(double)) * l_total;
 
     // Llenar la matriz SELL-P
     for (int b = 0; b < num_blocks; b++) {

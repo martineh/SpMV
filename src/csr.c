@@ -35,7 +35,7 @@ void mult_csr(struct csr *csr, double *x, double *y) {
   uint64_t *col_idx  = (uint64_t *)csr->j;
   double *vals = csr->A;
   
-  vuint64m1_t  v_idx;
+  vuint64m2_t  v_idx;
 
   vfloat64m2_t vx,vprod,vval;
   vfloat64m1_t vsum;
@@ -54,8 +54,8 @@ void mult_csr(struct csr *csr, double *x, double *y) {
 
       vval = __riscv_vle64_v_f64m2(&vals[j], vl);
 
-      v_idx = __riscv_vle64_v_u64m1(&col_idx[j], vl);
-      v_idx = __riscv_vsll_vx_u64m1(v_idx, 3, vl);
+      v_idx = __riscv_vle64_v_u64m2(&col_idx[j], vl);
+      v_idx = __riscv_vsll_vx_u64m2(v_idx, 3, vl);
       vx = __riscv_vloxei64_v_f64m2(x, v_idx, vl);
 
       vprod = __riscv_vfmacc_vv_f64m2(vprod, vval, vx, vl);
@@ -125,7 +125,7 @@ void mult_csr(struct csr *csr, double *x, double *y)
 {
     int l;
     for (int k = 0; k < csr->rows; k++) {
-        int *j = csr->j + csr->i[k];
+        int64_t *j = csr->j + csr->i[k];
         double *A = csr->A + csr->i[k];
         __m256d s = _mm256_setzero_pd();
         for (l = csr->i[k]; l < csr->i[k + 1] - (CSR_AVX2 - 1); l += CSR_AVX2) {
