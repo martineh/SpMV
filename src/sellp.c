@@ -15,8 +15,8 @@ struct mtx_coo {int i; int j; double a;};
 void mult_sellp(struct sellp *sellp, double *x, double *y)
 {
   vfloat64m2_t va, vx, vprod;
-  vuint32m1_t v_idx;
-  uint32_t *col_idx  = (uint32_t *)sellp->j; 
+  vuint64m1_t v_idx;
+  uint64_t *col_idx  = (uint64_t *)sellp->j; 
   size_t vl;
   vl = __riscv_vsetvl_e64m2(_BLOCK);
   for (int b = 0; b < sellp->num_blocks; b++) {
@@ -24,9 +24,9 @@ void mult_sellp(struct sellp *sellp, double *x, double *y)
     for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b + 1]; l += _BLOCK) {
       va    = __riscv_vle64_v_f64m2(&sellp->A[l],  vl);
 
-      v_idx = __riscv_vle32_v_u32m1(&col_idx[l], vl);
-      v_idx = __riscv_vsll_vx_u32m1(v_idx, 3, vl);
-      vx = __riscv_vloxei32_v_f64m2(x, v_idx, vl);
+      v_idx = __riscv_vle64_v_u64m1(&col_idx[l], vl);
+      v_idx = __riscv_vsll_vx_u64m1(v_idx, 3, vl);
+      vx = __riscv_vloxei64_v_f64m2(x, v_idx, vl);
 
       vprod = __riscv_vfmacc_vv_f64m2(vprod, va, vx, vl);
     }
@@ -307,7 +307,7 @@ void mult_sellp(struct sellp *sellp, double *x, double *y) {
         for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b + 1]; l += _BLOCK) {
             __m256d va = _mm256_castsi256_pd(_mm256_stream_load_si256((__m256i *)&sellp->A[l]));
             __m128i vj = _mm_stream_load_si128((__m128i *)&sellp->j[l]);
-            __m256d vx = _mm256_i32gather_pd(x, vj, 8);
+            __m256d vx = _mm256_i64gather_pd(x, vj, 8);
             s = _mm256_fmadd_pd(vx, va, s);
         }
         _mm256_stream_pd(&y[b * _BLOCK], s);
@@ -349,7 +349,7 @@ int by_row(const struct mtx_coo *a, const struct mtx_coo *b) {
     return 0;
 }
 
-struct sellp *create_sellp(int rows, int columns, int nnz, const int *row_ptr_csr, const int *col_idx, const double *A_csr) {
+struct sellp *create_sellp(int rows, int columns, int nnz, const int64_t *row_ptr_csr, const int64_t *col_idx, const double *A_csr) {
     struct sellp *sellp = (struct sellp *)aligned_alloc(ALIGN_BYTES, sizeof(*sellp));
     if (!sellp) { perror("aligned_alloc sellp"); exit(1); }
 
@@ -363,10 +363,10 @@ struct sellp *create_sellp(int rows, int columns, int nnz, const int *row_ptr_cs
     sellp->num_blocks = num_blocks;
 
     // block_ptr alineado
-    if (posix_memalign((void**)&sellp->block_ptr, ALIGN_BYTES, sizeof(int) * (num_blocks + 1))) {
+    if (posix_memalign((void**)&sellp->block_ptr, ALIGN_BYTES, sizeof(int64_t) * (num_blocks + 1))) {
         perror("posix_memalign block_ptr"); exit(1);
     }
-    sellp->memusage = sizeof(int) * (num_blocks + 1);
+    sellp->memusage = sizeof(int64_t) * (num_blocks + 1);
 
     // Crear COO a partir de CSR
 

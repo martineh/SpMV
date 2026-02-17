@@ -11,7 +11,7 @@ void mult_csr_numa(struct csr *csr, double *x, double *y)
             s += x[csr->j[l]] * csr->A[l];
         }
 #else
-        int *j = csr->j + csr->i[k];
+        int64_t *j = csr->j + csr->i[k];
         double *A = csr->A + csr->i[k];
         #pragma omp simd
         for (int l = csr->i[k]; l < csr->i[k + 1]; l++) {
@@ -28,14 +28,14 @@ struct csr *create_csr_numa(int rows, int columns, int nnz, struct mtx *mtx)
     csr->rows = rows;
     csr->columns = columns;
     csr->nnz = nnz;
-    csr->i = SPMV_ALLOC(int, rows + 1);
-    csr->j = SPMV_ALLOC(int, nnz);
+    csr->i = SPMV_ALLOC(int64_t, rows + 1);
+    csr->j = SPMV_ALLOC(int64_t, nnz);
     csr->A = SPMV_ALLOC(double, nnz);
-    csr->memusage = sizeof(int) * (rows + 1) + (sizeof(int) + sizeof(double)) * nnz;
+    csr->memusage = sizeof(int64_t) * (rows + 1) + (sizeof(int64_t) + sizeof(double)) * nnz;
 
     sort_mtx(nnz, mtx, by_row_mtx);
 
-    int *i = SPMV_ALLOC(int, rows + 1);
+    int64_t *i = SPMV_ALLOC(int64_t, rows + 1);
     // compute row offsets
     i[0] = 0;
     for (int l = 0, k = 0; k < rows; k++) {

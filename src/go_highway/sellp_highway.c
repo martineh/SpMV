@@ -16,7 +16,7 @@ struct sellp {
     int nnz;
     int num_blocks;
     int *block_ptr;
-    int *j;
+    int  *j;
     double *A;
     size_t memusage;
 };
@@ -26,7 +26,7 @@ struct sellp {
 void mult_sellp_highway(struct sellp *sellp, double *x, double *y) {
    
     using T = double;
-    uint32_t *col_idx  = (uint32_t *)sellp->j;  
+    const int64_t* col_idx = reinterpret_cast<const int64_t*>(sellp->j);
 
     #ifdef RVV1_M2_256
     const hn::ScalableTag<T, 1> d;
@@ -35,21 +35,22 @@ void mult_sellp_highway(struct sellp *sellp, double *x, double *y) {
     #endif
     
     //const size_t LANES = hn::Lanes(d);
+   
+    const hn::Rebind<int64_t,decltype(d)> di64;
+    const int64_t* block_ptr = reinterpret_cast<const int64_t*>(sellp->block_ptr);
     
-    const hn::Rebind<int32_t, decltype(d)> di32;
-    const hn::Rebind<int64_t, decltype(d)> di64;
+    // Iteradores en 64-bit
+    const int64_t num_blocks_64 = static_cast<int64_t>(sellp->num_blocks);
 
-
-    for (int b = 0; b < sellp->num_blocks; b++) {
+    for (int64_t b = 0; b < num_blocks_64; b++) {
         auto prod_v = hn::Zero(d);
         int restantes = 0;
-        for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b + 1]; l += _BLOCK) {
-           restantes = sellp->block_ptr[b + 1] - l;
+        for (int64_t l = block_ptr[b]; l < block_ptr[b + 1]; l += _BLOCK) {
+           restantes = block_ptr[b + 1] - l;
            const auto a_vals = hn::LoadN(d, sellp->A + l , restantes);
-           auto v_idx_32 = hn::LoadN(di32, reinterpret_cast<int32_t*>(col_idx + l), restantes);
+           auto v_idx = hn::LoadN(di64, col_idx + l,restantes);
 
-           auto v_idx_64 = hn::PromoteTo(di64, v_idx_32);
-           auto x_vals = hn::GatherIndex(d, x, v_idx_64);
+           auto x_vals = hn::GatherIndex(d, x, v_idx);
            prod_v = hn::MulAdd(a_vals, x_vals, prod_v);
         }
       

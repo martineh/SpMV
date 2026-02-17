@@ -22,11 +22,11 @@
 
 typedef double elem_t;
 
-#ifndef INDEX64
-typedef int32_t index_t;
-#else
+//#ifndef INDEX64
+//typedef int32_t index_t;
+//#else
 typedef int64_t index_t;
-#endif
+//#endif
 
 #define UNR 8
 

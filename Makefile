@@ -51,7 +51,12 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/go_highway/%.c | $(OBJ_DIR)
 spmv: driver_spmv.o $(OBJ_DIR)
 	$(CC) $(LDFLAGS) $^ -o $@
 
+asm: csr_highway.s
+
+csr_highway.s: src/go_highway/csr_highway.c
+	$(CC) $(CFLAGS) -S -fverbose-asm -DGO_HIGHWAY $< -o $@
 
 clean:
 	rm -rf build/*
+	rm -rf asm
 

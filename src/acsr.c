@@ -54,13 +54,13 @@ void mult_acsr (struct acsr *acsr, double *x, double *y) {
 */
 
 /* Block for vlen=128, x2 doubles */
-struct acsr *create_acsr(int nrows, int ncols, int nnz, double *values, int *columns, int *row_ptr) {
+struct acsr *create_acsr(int nrows, int ncols, int nnz, double *values, int64_t *columns, int64_t *row_ptr) {
 
     int capacity = row_ptr[nrows] * 2;
 
     double *v_values  = (double *)aligned_alloc(32, sizeof(double) * capacity);
-    int    *v_columns = (int *)aligned_alloc(32,sizeof(int) * capacity);
-    int    *v_rowptr  = (int *)aligned_alloc(32,sizeof(int) * (nrows + 1));
+    int64_t    *v_columns = (int64_t *)aligned_alloc(32,sizeof(int64_t) * capacity);
+    int64_t    *v_rowptr  = (int64_t *)aligned_alloc(32,sizeof(int64_t) * (nrows + 1));
 
     int vec_count = 0;
     int dist, start, end;

@@ -41,8 +41,8 @@ void print_mtx(int nnz, struct mtx *coo);
 struct csr {
     int rows, columns, nnz;
     long memusage;
-    int *i;
-    int *j;
+    int64_t *i;
+    int64_t *j;
     double *A;
 };
 

@@ -31,39 +31,39 @@ void mult_csr_autovec(struct csr *csr, double *x, double *y)
 void mult_csr(struct csr *csr, double *x, double *y) {
 
   size_t nrows = csr->rows;
-  uint32_t *row_ptrs = (uint32_t *)csr->i;
-  uint32_t *col_idx  = (uint32_t *)csr->j;
+  uint64_t *row_ptrs = (uint64_t *)csr->i;
+  uint64_t *col_idx  = (uint64_t *)csr->j;
   double *vals = csr->A;
   
-  vuint32m1_t  v_idx;
+  vuint64m1_t  v_idx;
 
   vfloat64m2_t vx,vprod,vval;
   vfloat64m1_t vsum;
 
   for (size_t i = 0; i < nrows; ++i) {
-    uint32_t start = row_ptrs[i];
-    uint32_t end  = row_ptrs[i + 1];
+    uint64_t start = row_ptrs[i];
+    uint64_t end  = row_ptrs[i + 1];
 
-    uint32_t j = start;
+    uint64_t j = start;
 
     vprod  = __riscv_vfmv_v_f_f64m2(0.0, 8);
     vsum   = __riscv_vfmv_v_f_f64m1(0.0, 1);
 
     while (j < end) {
-      int32_t vl = __riscv_vsetvl_e64m2(end - j);
+      int64_t vl = __riscv_vsetvl_e64m2(end - j);
 
       vval = __riscv_vle64_v_f64m2(&vals[j], vl);
 
-      v_idx = __riscv_vle32_v_u32m1(&col_idx[j], vl);
-      v_idx = __riscv_vsll_vx_u32m1(v_idx, 3, vl);
-      vx = __riscv_vloxei32_v_f64m2(x, v_idx, vl);
+      v_idx = __riscv_vle64_v_u64m1(&col_idx[j], vl);
+      v_idx = __riscv_vsll_vx_u64m1(v_idx, 3, vl);
+      vx = __riscv_vloxei64_v_f64m2(x, v_idx, vl);
 
       vprod = __riscv_vfmacc_vv_f64m2(vprod, vval, vx, vl);
 
       j += vl;
     }
 
-    int32_t vlr = __riscv_vsetvl_e64m2(nrows);
+    int64_t vlr = __riscv_vsetvl_e64m2(nrows);
     vsum = __riscv_vfredusum_vs_f64m2_f64m1(vprod, vsum, vlr);
     y[i] = __riscv_vfmv_f_s_f64m1_f64(vsum);
   }
@@ -130,7 +130,7 @@ void mult_csr(struct csr *csr, double *x, double *y)
         __m256d s = _mm256_setzero_pd();
         for (l = csr->i[k]; l < csr->i[k + 1] - (CSR_AVX2 - 1); l += CSR_AVX2) {
             __m128i vj = _mm_stream_load_si128((__m128i *)j);
-            __m256d vx = _mm256_i32gather_pd(x, vj, 8);
+            __m256d vx = _mm256_i64gather_pd(x, vj, 8);
             __m256d va = (__m256d)_mm256_stream_load_si256((__m256i *)A);
             s = _mm256_fmadd_pd(vx, va, s);
             A += CSR_AVX2;
@@ -173,10 +173,10 @@ struct csr *create_csr(int rows, int columns, int nnz, int alignment, struct mtx
         if (e != 0) p += alignment - e;
     }
 
-    csr->i = SPMV_ALLOC(int, rows + 1);
-    csr->j = SPMV_ALLOC(int, p);
+    csr->i = SPMV_ALLOC(int64_t, rows + 1);
+    csr->j = SPMV_ALLOC(int64_t, p);
     csr->A = SPMV_ALLOC(double, p);
-    csr->memusage = sizeof(int) * (rows + 1) + (sizeof(int) + sizeof(double)) * p;
+    csr->memusage = sizeof(int64_t) * (rows + 1) + (sizeof(int64_t) + sizeof(double)) * p;
 
     csr->i[0] = 0;
     for (int p = 0, l = 0, k = 0; k < rows; k++) {
