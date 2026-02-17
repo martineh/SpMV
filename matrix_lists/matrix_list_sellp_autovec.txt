@@ -1,4 +1,0 @@
-matrix/Queen_4147/Queen_4147.mtx
-matrix/nlpkkt200/nlpkkt200.mtx
-matrix/nlpkkt240/nlpkkt240.mtx
-matrix/stokes/stokes.mtx
