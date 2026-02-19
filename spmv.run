@@ -17,7 +17,7 @@ LIST=matrix_lists/matrix_list_160.txt
 #    [*] sellp_autovec
 #    [*] sellp_highway
 #----------------------------------------------
-MODE=sellp_autovec
+MODE=csr_highway
 #----------------------------------------------
 
 #----------------------------------------------
