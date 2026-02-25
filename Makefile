@@ -3,18 +3,24 @@ include Makefile.inc
 CC = g++
 
 ifeq ($(SIMD), AVX2)
-	CFLAGS=-mavx2 -mfma -march=haswell -maes
+    CFLAGS=-mavx2 -mfma -march=haswell -maes
 else ifeq ($(SIMD), NEON)
-	CFLAGS=-march=armv8-a
+    CFLAGS=-march=armv8-a
 else ifeq ($(SIMD), RVV1_M2_256)
-	CFLAGS=-march=rv64gcv_zfh 
+    CFLAGS=-march=rv64gcv_zfh 
 else ifeq ($(SIMD), SVE_128)
-	CFLAGS=-march=armv8-a+sve
+    CFLAGS=-march=armv8-a+sve
 else ifeq ($(SIMD), SVE_256)
-	CFLAGS=-march=armv8-a+sve2
+    CFLAGS=-march=armv8-a+sve2
 else
-	$(error ERROR: Type of arch='$(SIMD) unsuported.)
+    $(error ERROR: Type of arch='$(SIMD) unsuported.)
 endif
+
+
+ifeq ($(NO_AUTOVEC), ON)
+    CFLAGS += -fno-tree-vectorize
+endif
+
 
 CFLAGS += -Wall -O3 -fopenmp -D$(SIMD)
 LDFLAGS = -lm -fopenmp
