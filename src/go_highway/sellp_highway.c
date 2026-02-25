@@ -42,18 +42,16 @@ void mult_sellp_highway(struct sellp *sellp, double *x, double *y) {
 
     for (int b = 0; b < sellp->num_blocks; b++) {
         auto prod_v = hn::Zero(d);
-        int restantes = 0;
         for (int l = sellp->block_ptr[b]; l < sellp->block_ptr[b + 1]; l += _BLOCK) {
-           restantes = sellp->block_ptr[b + 1] - l;
-           const auto a_vals = hn::LoadN(d, sellp->A + l , restantes);
-           auto v_idx_32 = hn::LoadN(di32, reinterpret_cast<int32_t*>(col_idx + l), restantes);
+           const auto a_vals = hn::Load(d, sellp->A + l);
+           auto v_idx_32 = hn::Load(di32, reinterpret_cast<int32_t*>(col_idx + l));
 
            auto v_idx_64 = hn::PromoteTo(di64, v_idx_32);
            auto x_vals = hn::GatherIndex(d, x, v_idx_64);
            prod_v = hn::MulAdd(a_vals, x_vals, prod_v);
         }
       
-        hn::StoreN(prod_v, d, &y[b * _BLOCK],restantes) ;
+        hn::Store(prod_v, d, &y[b * _BLOCK]) ;
     }
 } 
 
