@@ -1,51 +1,30 @@
-SpMV
-====
 
-`spmv_power.c` es el driver principal. El primer parámetro es la implementación del producto (corresponde con el nombre del módulo más abajo) y el segundo el fichero MTX. Cada campo de la línea de salida es:
-1. Implementación SpMV
-2. Nombre de la matriz
-3. Hilos de OpenMP
-4. Procesos de MPI
-5. Filas
-6. Columnas
-7. Valores no nulos
-8. FLOP/s del SpMV
-9. Tiempo medio del SpMV
-10. Iteraciones
-11. Error comparando con COO
-12. Memoria utilizada
+# SpMV Driver
 
-Este programa calcula el método de la potencia, es decir multiplica un vector normalizado por la matriz, el resultado se normaliza y repite la multiplicación. La idea es que sea más realista que simplemente repetir la SpMV una y otra vez que como la SpMV depende mucho de la caché hace que la SpMV funcione demasiado bien.
+SpMV Driver is an application designed for the evaluation of the Sparse Matrix-Vector multiplication (SpMV) operation.
 
-`ssstats.txt`: Lista de matrices (para bajar con wget)
-`run.sh`: script para ejecutar
+This software enables users to perform systematic benchmarking and analysis of different sparse matrix storage formats and implementation strategies within the target system. It provides a structured environment to compare performance across multiple approaches for executing the sparse matrix-vector product.
 
-Implementaciones del SPMV
--------------------------
+The tool is intended to support experimentation, optimization, and performance evaluation of SpMV implementations, helping users identify the most efficient configuration for their specific hardware and workload.
 
-`csr.c`: CSR básico. He hecho una versión con intrínsecas de AVX2 que funciona peor que el código hecho por GCC :-(
+## Requisites
 
-`csr_merge.c`: código de Enrique para el CSR merge
+Installation of the Google Highway library is mandatory if you intend to perform an evaluation based on this library.
 
-`csr_bal.c`: versión alternativa del CSR merge que es más fácil de vectorizar. De hecho la vectorización es la misma que el CSR normal.
+## Supported Hardware
 
-`csr_epi.c`: CSR vectorizada para el EPI del BSC
+Any processor with this architectures:
+  *ARM Neon
+  *ARM SVE
+  *ARM SVE2
+  *AVX2
+  *RISCV-V RVV 1.0 (256 bits vector length)
 
-`sell.c`, `radix_sort.c`, `sellcs_analyzer.c`, `sellcs_format.c`, `sellcs_mv_autovector.c`, `sellcs_mv.c`, `sellcs_mv_kernels_epi.c`, `sellcs_utils.c`: código del BSC para el formato SELL (versión vectorizada solamente para el EPI)
+## How to use
 
-`csr_numa.c`: CSR copiando la matriz en trozos para cada thread
-
-`coo.c`: COO
-
-`csr_mkl.c`: CSR de la MKL
-
-`petsc.c`: SpMV del PETSc
-
-`csri.c`, `ell0.c`, `pcsr.c`, `mtx_to_bin.c`: experimentos NO MIRAR ;-)
-
-Otros ficheros
---------------
-
-`spmv.h`: cabecera con las definiciones de todos los módulos
-
-`mtx.c`: código para cargar matrices
+1. Configure Makefile.inc with the compilation options (autovectorization, platform and Google Highway integration).
+2. Compile the library with "make"
+3. Configure "spmv.run" with the matrix list to test and the SpMV algorithm to be tested. 
+4. Execute "./spmv.run"
+5. The results will appear on the screen, and an output file will be generated.
+ 

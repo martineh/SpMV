@@ -61,7 +61,7 @@ void mult_csr_highway(struct csr *csr, double *x, double *y) {
         }
         y[i] = hn::ReduceSum(d, prod_v) ;
 
-	for (;j < elements; j++) y[i] += x[col_index[j]] * values[j];
+	for (;j < elements; j++) y[i] += x[col_index[start_index + j]] * values[start_index + j];
 
     }
   }
