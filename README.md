@@ -14,11 +14,11 @@ Installation of the Google Highway library is mandatory if you intend to perform
 ## Supported Hardware
 
 Any processor with this architectures:
-  *ARM Neon
-  *ARM SVE
-  *ARM SVE2
-  *AVX2
-  *RISCV-V RVV 1.0 (256 bits vector length)
+*ARM Neon
+*ARM SVE
+*ARM SVE2
+*AVX2
+*RISCV-V RVV 1.0 (256 bits vector length)
 
 ## How to use
 
